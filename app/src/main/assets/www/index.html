@@ -1,0 +1,700 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="theme-color" content="#0b2a7a"><meta name="description" content="Le prix de l'or à Bamako en direct, avec calculatrice par carat."><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Sanu Prix"><meta name="application-name" content="Sanu Prix à Bamako"><title>Sanu Prix à Bamako</title></head><body>
+<style id="pagecss">
+/* Layout: one column, big price per gram on top, carat grid, calculator, update panel for the owner */
+:root{
+  --bg:#f3f2ee; --surface:#ffffff; --ink:#1b1f33; --muted:#5d6278; --line:#dcdbe3;
+  --indigo:#23306b; --gold:#a8730f; --gold-soft:#f3e6c6; --up:#1f7a4d; --down:#b23a2e;
+  --f-display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --f-num:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12142a; --surface:#1b1e3a; --ink:#ecebf3; --muted:#a3a6be; --line:#2e3258;
+  --indigo:#aab6f2; --gold:#e6b450; --gold-soft:#3a3120; --up:#5fc994; --down:#ef8a7f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12142a; --surface:#1b1e3a; --ink:#ecebf3; --muted:#a3a6be; --line:#2e3258;
+  --indigo:#aab6f2; --gold:#e6b450; --gold-soft:#3a3120; --up:#5fc994; --down:#ef8a7f; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+#app{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:20px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0}
+h2{font-size:1rem;font-weight:600;letter-spacing:.01em}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+header{display:grid;gap:4px}
+header h1{font-size:1.15rem;color:var(--indigo)}
+.hero{background:var(--indigo);color:#fff;border-radius:18px;padding:22px 20px;display:grid;gap:6px;position:relative;overflow:hidden}
+:root[data-theme="dark"] .hero{background:#232a63}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:#232a63}}
+.hero::after{content:"";position:absolute;inset:auto -40px -60px auto;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#f5d488,#a8730f 70%);opacity:.9}
+.hero .eyebrow{color:#c9cff0}
+.hero .big{font-family:var(--f-display);font-size:clamp(2.2rem,9vw,3.2rem);font-weight:700;line-height:1.05;position:relative;z-index:1}
+.hero .big small{font-size:.4em;font-weight:500;color:#dfe3fa}
+.hero .meta{font-size:.82rem;color:#dfe3fa;position:relative;z-index:1;max-width:70%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.chip{background:rgba(255,255,255,.12);border-radius:999px;padding:3px 10px;font-size:.78rem}
+section{display:grid;gap:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.k{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:2px}
+.k .lab{font-size:.8rem;color:var(--muted)}
+.k .val{font-size:1.1rem;font-weight:600}
+.k .sub{font-size:.75rem;color:var(--muted)}
+.k.on{border-color:var(--gold);background:var(--gold-soft)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+label{display:grid;gap:4px;font-size:.82rem;color:var(--muted);font-weight:500}
+input,select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box;min-width:0}
+input[aria-invalid="true"]{border-color:var(--down)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.result{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px;border-top:1px dashed var(--line);padding-top:12px}
+.result .val{font-family:var(--f-display);font-size:1.6rem;font-weight:700;color:var(--gold)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--indigo);color:var(--bg);border-color:var(--indigo)}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;background:var(--gold);color:#fff;cursor:pointer}
+.btn[disabled]{opacity:.5;cursor:default}
+.note{font-size:.8rem;color:var(--muted);margin:0}
+.msg{font-size:.85rem;margin:0}
+.msg.ok{color:var(--up)} .msg.err{color:var(--down)}
+.hist{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.hist li:last-child{border-bottom:0}
+a{color:var(--indigo)}
+details summary{cursor:pointer;font-weight:600;font-family:var(--f-display);font-size:1rem}
+.ad{position:relative;background:var(--surface);border-block:1px solid var(--line);overflow:hidden}
+/* Annonces en pleine largeur d'écran : bord à bord sur téléphone, toute la fenêtre sur ordinateur */
+body{overflow-x:clip}
+#ads{margin-inline:-16px}
+@media (min-width:700px){#ads{margin-inline:calc(50% - 50vw)}}
+.ad .slide{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:center;padding:14px 16px 10px;max-width:640px;margin-inline:auto;box-sizing:border-box;width:100%}
+.ad .t{font-family:var(--f-display);font-weight:600;font-size:1.15rem;margin:0}
+.ad .d{margin:2px 0 0;font-size:.95rem;color:var(--muted);white-space:pre-line}
+.ad .tel{margin:6px 0 0;font-size:.95rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ad .tel b{font-family:var(--f-num);user-select:all}
+.ad .tag{position:absolute;top:8px;right:10px;z-index:3;font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:#fff;background:rgba(0,0,0,.55);border-radius:999px;padding:2px 8px}
+/* Zone photo/vidéo : toute la largeur, forme d'origine respectée, côtés remplis par un flou de l'image */
+.ad .media{position:relative;overflow:hidden;background:#111;width:100%;aspect-ratio:16/9;max-height:80vh}
+.ad .media .bg{position:absolute;inset:-10%;width:120%;height:120%;filter:blur(22px) brightness(.55);background-size:cover;background-position:center}
+.ad .media .main{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;display:block;border-radius:0}
+/* Téléphone : annonce compacte (image ≈ 30 % plus basse, texte réduit à 2 lignes) */
+@media (max-width:520px){
+  .ad .media{max-height:min(14vh,96px)}
+  .ad .slide{padding:8px 16px 4px;gap:6px}
+  .ad .t{font-size:.95rem}
+  .ad .d{font-size:.82rem;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ad .tel{font-size:.82rem;margin-top:4px}
+  .ad .tag{font-size:.55rem;top:6px;right:8px;padding:1px 6px}
+  .ad .snd,.ad .fs{width:30px;height:30px;padding:0;justify-content:center;bottom:6px;border-radius:50%}
+  .ad .snd .lbl,.ad .fs .lbl{display:none}
+  .ad .fs{right:8px}.ad .snd{left:8px}
+  .ad .tag{font-size:9px}
+  .dots button{width:20px;height:20px}
+  .dots{padding-bottom:2px}
+}
+.ad .media:fullscreen{max-height:none;aspect-ratio:auto!important;width:100vw;height:100vh}
+.ad .media:-webkit-full-screen{max-height:none;aspect-ratio:auto!important;width:100vw;height:100vh}
+.ad .snd,.ad .fs{position:absolute;bottom:10px;z-index:2;font:inherit;font-size:.8rem;font-weight:600;border:0;border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+.ad .snd,.ad .fs{display:inline-flex;align-items:center;gap:6px}
+.ad .snd svg,.ad .fs svg{flex:none}
+.ad .snd{left:10px}
+.ad .fs{right:10px}
+.ad.empty{border-style:dashed;padding:14px;text-align:center;color:var(--muted);font-size:.88rem}
+.dots{display:flex;gap:4px;justify-content:center;padding-bottom:6px}
+.dots button{width:24px;height:24px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+.dots button::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots button[aria-current="true"]::before{background:var(--gold)}
+.adlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.adlist li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.adlist li span{min-width:0;overflow-wrap:anywhere}
+.adlist li.off span{opacity:.5}
+.mini{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+.mini.danger{color:var(--down);border-color:var(--down)}
+textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box;min-height:64px;resize:vertical}
+.show-sm{display:none}
+.calc .amt{min-width:0}
+.calc .amt>*{white-space:nowrap}
+#app{grid-template-columns:minmax(0,1fr)}
+#app>*{min-width:0}
+.hero .meta{overflow-wrap:anywhere}
+.hero .meta .num{white-space:normal!important}
+.hero .listen{justify-self:start;display:inline-flex;align-items:center;gap:8px;margin-top:4px;font:inherit;font-weight:600;font-size:.9rem;color:#1b1f33;background:#f5d488;border:0;border-radius:999px;padding:8px 14px;cursor:pointer;position:relative;z-index:1}
+.hero .listen.on{background:#fff}
+.hero .listenrow{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.hero .listen.alt{background:rgba(255,255,255,.14);color:#fff}
+.hero .listen.alt.on{background:#fff;color:#1b1f33}
+.hero .listen:focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* Historique compact : une ligne par jour */
+.histc{gap:6px}
+.histc h2{font-size:.85rem;color:var(--muted);font-weight:600}
+.histc .panel{padding:4px 12px}
+.histc .hist li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:5px 0;font-size:.8rem;white-space:nowrap;align-items:baseline}
+.histc .hist li .num{text-align:right}
+.histc .bamc{color:var(--muted);font-size:.74rem}
+@media (max-width:380px){.histc .hist li{font-size:.72rem;gap:6px}.histc .bamc{font-size:.68rem}}
+/* Montants en Bam. (dɔrɔmɛ) sous les F CFA */
+.hero .bigbam{font-family:var(--f-display);font-size:clamp(1.2rem,4.5vw,1.6rem);font-weight:600;color:#f5d488;line-height:1.1;position:relative;z-index:1}
+.hero .bigbam small{font-size:.6em;font-weight:500}
+.amt{display:grid;justify-items:end;gap:0;text-align:right}
+.amt .bam{font-size:.78rem;color:var(--muted)}
+.amt .bam-main{font-family:var(--f-display);font-size:1rem;font-weight:700;color:var(--gold)}
+/* Calculatrice compacte */
+.panel.calc{padding:12px 14px;gap:8px}
+.calc .seg.karats{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.calc .seg.karats button{padding:4px 2px;font-size:.8rem}
+.calc .inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(8em,1fr));gap:8px}
+.calc label{font-size:.76rem;gap:2px}
+.calc input{padding:7px 10px;font-size:.95rem}
+.calc .note{font-size:.72rem}
+.calc .result{padding-top:6px;font-size:.85rem}
+.calc .result .val{font-size:1.25rem}
+.calc .result{flex-wrap:nowrap;align-items:center}
+.calc .result .lab{min-width:0;line-height:1.25}
+.calc .result > :last-child{white-space:nowrap;text-align:right}
+@media (max-width:520px){.calc .result .val{font-size:1.1rem}.calc .seg.karats button{font-size:.74rem}}
+.seg.karats{display:grid;grid-template-columns:repeat(auto-fill,minmax(4.4em,1fr));gap:6px}
+.seg.karats button{padding:6px 4px;text-align:center}
+@media (max-width:520px){.ads-admin{display:none!important}}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:-8px}
+.cta .btn-wa{flex:1 1 auto}
+.btn-wa{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:.95rem;text-decoration:none;border-radius:999px;padding:11px 18px;background:#1a7f4b;text-align:center;color:#fff;border:2px solid #1a7f4b}
+.btn-wa.share{background:var(--surface);color:#1a7f4b}
+:root[data-theme="dark"] .btn-wa.share{color:#5fc994;border-color:#5fc994}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn-wa.share{color:#5fc994;border-color:#5fc994}}
+.btn-wa{min-width:0;overflow-wrap:anywhere}.btn-wa svg{flex:none}
+@media (max-width:520px){.cta{gap:8px}.btn-wa{font-size:.88rem;padding:10px 12px;gap:6px}}
+.btn-wa:hover{filter:brightness(1.08)}
+.btn-wa:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* Téléphone : bandeau du prix plus compact */
+@media (max-width:520px){
+  .hero{padding:14px 16px;gap:4px;border-radius:14px}
+  .hero .big{font-size:2.3rem}
+  .hero .eyebrow{font-size:.66rem;letter-spacing:.08em}
+  .hero .meta{max-width:none;font-size:.8rem}
+  .hero::after{width:96px;height:96px;inset:auto -28px -36px auto}
+  .chip{font-size:.74rem;padding:2px 8px}
+  .hide-sm{display:none!important}
+  .show-sm{display:inline}
+}
+/* Téléphone : tout tient sur un seul écran */
+@media (max-width:520px){
+  #app{padding-block:8px 16px;gap:8px}
+  header .eyebrow{display:none}
+  header h1{font-size:.95rem}
+  .hero{padding:10px 14px;gap:2px}
+  .hero > .eyebrow{font-size:.6rem}
+  .hero .big{font-size:1.9rem}
+  .hero .bigbam{font-size:.95rem}
+  .hero .chips{display:none}
+  .hero .meta{font-size:.72rem;line-height:1.35}
+  .hero::after{width:70px;height:70px;inset:auto -22px -26px auto}
+  .cta{margin-top:0;gap:6px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .cta .btn-wa{flex:none;min-width:0;padding:3px 6px;font-size:.64rem;line-height:1.1;gap:4px;white-space:nowrap;border-width:1px}
+  .cta .btn-wa svg{width:12px;height:12px}
+  .calcsec{gap:4px}
+  .calcsec h2{font-size:.85rem}
+  .panel.calc{padding:8px 10px;gap:5px}
+  .calc .seg.karats button{padding:3px 1px}
+  .calc label{font-size:.7rem}
+  .calc input{padding:5px 8px;font-size:max(16px,.9rem)}
+  #purity,.calc .bamnote,.calc .r-world{display:none}
+  .calc .seg.karats{gap:3px}
+  .calc .seg.karats button{font-size:.66rem;padding:4px 0;line-height:1.1;white-space:nowrap;letter-spacing:-.01em}
+  .calc .inputs{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
+  .calc .inputs input{min-width:0}
+  .calc .result .lab{white-space:normal;flex:1 1 4em}
+  .calcsec h2{font-size:.8rem}
+  .calc .result{padding-top:4px;font-size:.78rem}
+  .calc .result .val{font-size:1rem}
+  .amt .bam{font-size:.7rem}
+  .amt .bam-main{font-size:.85rem}
+  #hist-sec{display:none!important}
+  .disclaimer{font-size:.58rem;line-height:1.2;text-align:center}
+  #admin{gap:4px}
+  #admin > details.panel{padding:4px 10px;border-radius:8px}
+  #admin > details.panel > summary{font-size:.72rem;font-weight:600;color:var(--muted)}
+  #admin > details.panel[open]{padding:10px}
+}
+/* Téléphone : l'application s'adapte à la hauteur de l'écran (texte plus grand sur les grands écrans, sans jamais dépasser) */
+@media (max-width:520px){
+  html{font-size:max(100%,min(calc((100vh - 230px) / 19.5),24px))}
+  html{font-size:max(100%,min(calc((100dvh - 230px) / 19.5),24px))}
+  #app{box-sizing:border-box;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between}
+  #app>*{flex:none}
+  #app{justify-content:flex-start;gap:min(1.6vh,14px)}
+  #app>.hero{flex:1 1 auto;align-content:space-evenly;max-height:34vh}
+  #app>.calcsec{flex:2 1 auto;grid-template-rows:auto 1fr}
+  #app>.calcsec>.panel.calc{align-content:space-evenly}
+  #app>.disclaimer{margin-top:auto}
+  .hero .big{font-size:max(1.9rem,min(7.5vh,15vw))}
+  .hero .bigbam{font-size:max(.95rem,min(3.2vh,6.5vw))}
+  .cta .btn-wa{padding-block:max(3px,.9vh)}
+}
+/* Tablettes et petits ordinateurs : texte et largeur proportionnels à l'écran */
+@media (min-width:521px) and (max-width:1100px){
+  html{font-size:max(100%,min(calc(100vw / 52),20px))}
+  #app{max-width:min(92vw,46rem)}
+}
+/* Téléphone couché (paysage) : pas de remplissage forcé, défilement normal */
+@media (max-height:480px) and (orientation:landscape){
+  html{font-size:100%!important}
+  #app{min-height:0!important;display:grid!important}
+}
+/* Courbe du prix — style graphique boursier */
+:root{--tr-line:#a8730f;--tr-fill:#e9dcbf;--tr-bg:#f8f4ea;--tr-grid:#e2dccd}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tr-line:#b88a2c;--tr-fill:#4a3d22;--tr-bg:#22253f;--tr-grid:#33375c}}
+:root[data-theme="dark"]{--tr-line:#b88a2c;--tr-fill:#4a3d22;--tr-bg:#22253f;--tr-grid:#33375c}
+.trend{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-height:0}
+.tr-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.tr-head h2{font-size:.9rem;margin-right:auto}
+.tr-chip{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.tr-chip.up{color:var(--up);background:color-mix(in srgb,var(--up) 12%,transparent)}
+.tr-chip.down{color:var(--down);background:color-mix(in srgb,var(--down) 12%,transparent)}
+.tr-seg{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.tr-seg button{font-size:.74rem;padding:3px 4px;text-align:center;white-space:nowrap}
+.tr-plot{position:relative;flex:1 1 auto;min-height:140px;height:200px}
+.tr-plot svg{position:absolute;inset:0;display:block;overflow:visible;touch-action:pan-y}
+.tr-bg{fill:var(--tr-bg)}
+.tr-grid{stroke:var(--tr-grid);stroke-width:1}
+.tr-vgrid{stroke:var(--tr-grid);stroke-width:1}
+.tr-area{fill:var(--tr-fill)}
+.tr-line{fill:none;stroke:var(--tr-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.tr-end{fill:var(--tr-line);stroke:var(--surface);stroke-width:2}
+.tr-dot{fill:var(--surface);stroke:var(--tr-line);stroke-width:2}
+.tr-cross{stroke:var(--muted);stroke-width:1}
+.tr-axis{fill:var(--muted);font-variant-numeric:tabular-nums}
+.tr-tip{position:absolute;z-index:2;pointer-events:none;background:var(--surface);color:var(--ink);border:1.5px solid var(--tr-line);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);padding:5px 9px;font-size:.74rem;display:grid;line-height:1.35;white-space:nowrap}
+.tr-tip b{font-size:.8rem}
+.tr-tip .tv{font-weight:700;font-size:.82rem}
+.tr-tip .tb{color:var(--muted)}
+.tr-upd{margin:0;font-size:.68rem;color:var(--muted);text-align:center}
+.tr-table summary{font-size:.75rem;color:var(--muted);font-weight:500;font-family:inherit}
+.tr-table ul{list-style:none;margin:4px 0 0;padding:0;max-height:200px;overflow:auto;font-size:.78rem}
+.tr-table li{display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}
+.tr-table li .num{text-align:right}
+.tr-note{margin:0;font-size:.68rem;color:var(--muted)}
+@media (min-width:521px){.tr-plot{height:340px}}
+@media (max-width:520px){
+  #app>.trend{flex:1.8 1 auto;padding:6px 8px;gap:3px}
+  .tr-head h2{font-size:.8rem}
+  .tr-chip{font-size:.68rem;padding:1px 7px}
+  .tr-seg{gap:3px}.tr-seg button{font-size:.6rem;padding:1px 2px}
+  .tr-plot{height:auto;min-height:max(108px,15vh)}
+  .tr-upd{font-size:.55rem}
+  .tr-table,.tr-note{display:none}
+  html{font-size:max(100%,min(calc((100vh - 15vh - 315px) / 21),23px))}
+  html{font-size:max(100%,min(calc((100dvh - 15dvh - 315px) / 21),23px))}
+}
+@media (max-width:520px) and (max-height:640px){.tr-plot{min-height:88px}.tr-upd{display:none}}
+/* Page d'accueil simplifiée : la calculatrice complète est sur sa propre page (bouton « Calculatrice ») */
+.calcsec,#hist-sec{display:none!important}
+@media (max-width:520px){
+  html{font-size:max(100%,min(calc((100vh - 260px) / 19),23px))}
+  html{font-size:max(100%,min(calc((100dvh - 260px) / 19),23px))}
+  #app>.trend{flex:1 1 auto}
+  .tr-plot{min-height:max(150px,30vh)}
+  .tr-upd{display:block!important}
+}
+/* Carte « L'or monte ou baisse ? » (choix n° 5, compact) */
+.trend{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:12px!important;gap:10px!important;color:var(--ink)}
+.trend .tr-h{margin:0;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo)}
+.tr-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tr-cur{font-size:1.25rem;font-weight:800;white-space:nowrap;color:var(--ink)}
+.tr-cur small{font-size:.6em;font-weight:600;color:var(--muted)}
+.tr-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tr-tile{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer;min-width:0;text-align:left}
+.tr-tile[aria-pressed="true"]{border:2px solid var(--indigo);padding:7px 9px}
+.tr-tile:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tr-tl{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.tr-tv{font-size:1.3rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tr-tv.up{color:var(--up)}.tr-tv.down{color:var(--down)}
+.tr-mini{background:var(--tr-bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-height:0}
+.tr-cap{font-size:.8rem;color:var(--muted)}
+.trend .tr-plot{position:relative;flex:1 1 auto;min-height:70px;height:110px}
+.trend .tr-line{fill:none;stroke:var(--tr-line);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.trend .tr-end{fill:var(--tr-line);stroke:var(--tr-bg);stroke-width:2}
+.trend .tr-hi{fill:var(--surface);stroke:var(--up);stroke-width:2}
+.trend .tr-lo{fill:var(--surface);stroke:var(--down);stroke-width:2}
+.tr-hl{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.tr-hl b{color:var(--ink)}
+.trend .tr-tip b{font-size:.8rem}
+@media (min-width:521px){.trend .tr-plot{height:180px}.tr-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:520px){
+  .trend .tr-h{font-size:.72rem}
+  .tr-tv{font-size:1.15rem}
+  .trend .tr-plot{height:auto;min-height:60px}
+  .tr-tile{padding:6px 9px}.tr-tile[aria-pressed="true"]{padding:5px 8px}
+}
+@media (prefers-reduced-motion:no-preference){.hero .big{transition:opacity .3s}}
+/* Bouton Calculatrice */
+.btn-calc{flex:1 1 100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:600;font-size:.95rem;text-decoration:none;border-radius:999px;padding:11px 18px;
+  background:linear-gradient(180deg,#f7dc8a,#d9a93a);color:#3a2806;border:2px solid #9c7419;cursor:pointer}
+.btn-calc svg{flex:none}
+.btn-calc:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (max-width:520px){.cta .btn-calc{grid-column:1/-1;padding:4px 6px;font-size:.7rem;border-width:1px;gap:4px}.cta .btn-calc svg{width:12px;height:12px}}
+
+/* Synchronisation automatique du cours */
+.syncbar{display:flex;align-items:center;gap:7px;margin-top:-4px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font-size:.72rem;line-height:1.25}
+.syncdot{width:7px;height:7px;border-radius:50%;background:var(--up);flex:none}
+.syncbar.off .syncdot{background:var(--down)}
+.syncbar.wait .syncdot{background:var(--gold)}
+@media (max-width:520px){.syncbar{font-size:.6rem;padding:4px 7px;margin-top:-2px}}
+
+</style>
+
+<div id="app"></div>
+<script type="application/json" id="state">{"usdOz":4165.42,"eurUsd":1.1237,"date":"2026-10-17","source":"FindBullionPrices · mis à jour à 16 h 55 (heure de Bamako)","prime":2.13,"ads":[{"id":"auto-2026-10-17-0","title":"DIARRA OR","text":"Votre or vaut plus que vous ne pensez — Demandez le prix du jour sur WhatsApp. Achat – Vente d'or à Bokoro.","tel":"+22379313471","img":"/_blob/58bd2fe6cb4f5ed333969eaf819add79","on":true,"banner":true,"auto":true,"date":"2026-10-17","slot":0},{"id":"auto-2026-10-17-1","title":"DIARRA OR","text":"DIARRA OR, partenaire de confiance — Achat – Vente d'or · Bokoro, Selefougou. Achat – Vente d'or à Bokoro.","tel":"+22379313471","img":"/_blob/e58448d1924a16b50a070d5d65545258","on":true,"banner":true,"auto":true,"date":"2026-10-17","slot":1}],"history":[{"date":"2026-04-15","usdOz":4825.11,"eurUsd":1.179},{"date":"2026-04-16","usdOz":4793.28,"eurUsd":1.1796},{"date":"2026-04-17","usdOz":4831.22,"eurUsd":1.1805},{"date":"2026-04-20","usdOz":4797.61,"eurUsd":1.176},{"date":"2026-04-21","usdOz":4759.38,"eurUsd":1.1755},{"date":"2026-04-22","usdOz":4704.19,"eurUsd":1.1733},{"date":"2026-04-23","usdOz":4673.14,"eurUsd":1.1693},{"date":"2026-04-24","usdOz":4708.69,"eurUsd":1.1698},{"date":"2026-04-27","usdOz":4671.68,"eurUsd":1.1723},{"date":"2026-04-28","usdOz":4595.97,"eurUsd":1.1702},{"date":"2026-04-29","usdOz":4556.64,"eurUsd":1.1691},{"date":"2026-04-30","usdOz":4544.78,"eurUsd":1.1698},{"date":"2026-05-01","usdOz":4615.24,"eurUsd":1.175},{"date":"2026-05-04","usdOz":4585.78,"eurUsd":1.1715},{"date":"2026-05-05","usdOz":4547.03,"eurUsd":1.1695},{"date":"2026-05-06","usdOz":4677.65,"eurUsd":1.1744},{"date":"2026-05-07","usdOz":4740.47,"eurUsd":1.1751},{"date":"2026-05-08","usdOz":4717.69,"eurUsd":1.1756},{"date":"2026-05-11","usdOz":4669.62,"eurUsd":1.1768},{"date":"2026-05-12","usdOz":4699.25,"eurUsd":1.1755},{"date":"2026-05-13","usdOz":4694.31,"eurUsd":1.1719},{"date":"2026-05-14","usdOz":4699.73,"eurUsd":1.1694},{"date":"2026-05-15","usdOz":4541.25,"eurUsd":1.1646},{"date":"2026-05-18","usdOz":4541.35,"eurUsd":1.1635},{"date":"2026-05-19","usdOz":4540.16,"eurUsd":1.1627},{"date":"2026-05-20","usdOz":4491.42,"eurUsd":1.1614},{"date":"2026-05-21","usdOz":4514.33,"eurUsd":1.1606},{"date":"2026-05-22","usdOz":4514.45,"eurUsd":1.1606},{"date":"2026-05-25","usdOz":4571.16,"eurUsd":1.1641},{"date":"2026-05-26","usdOz":4511.95,"eurUsd":1.1631},{"date":"2026-05-27","usdOz":4431.23,"eurUsd":1.1642},{"date":"2026-05-28","usdOz":4393,"eurUsd":1.1623},{"date":"2026-05-29","usdOz":4514,"eurUsd":1.1655},{"date":"2026-06-01","usdOz":4538.97,"eurUsd":1.1636},{"date":"2026-06-02","usdOz":4520.24,"eurUsd":1.1635},{"date":"2026-06-03","usdOz":4460.57,"eurUsd":1.1614},{"date":"2026-06-04","usdOz":4461.92,"eurUsd":1.162},{"date":"2026-06-05","usdOz":4467.9,"eurUsd":1.1581},{"date":"2026-06-08","usdOz":4343.21,"eurUsd":1.1527},{"date":"2026-06-09","usdOz":4219.26,"eurUsd":1.1553},{"date":"2026-06-12","usdOz":4179,"eurUsd":1.1573},{"date":"2026-06-15","usdOz":4362.93,"eurUsd":1.1599},{"date":"2026-06-16","usdOz":4337.84,"eurUsd":1.1597},{"date":"2026-06-17","usdOz":4359.48,"eurUsd":1.1547},{"date":"2026-06-18","usdOz":4205.55,"eurUsd":1.149},{"date":"2026-06-19","usdOz":4155.68,"eurUsd":1.1449},{"date":"2026-06-22","usdOz":4191.19,"eurUsd":1.1446},{"date":"2026-06-23","usdOz":4112.45,"eurUsd":1.1407},{"date":"2026-06-24","usdOz":3994.19,"eurUsd":1.1355},{"date":"2026-06-25","usdOz":4030.15,"eurUsd":1.1361},{"date":"2026-06-26","usdOz":4072.49,"eurUsd":1.1394},{"date":"2026-06-29","usdOz":4016.27,"eurUsd":1.1406},{"date":"2026-06-30","usdOz":4007.52,"eurUsd":1.141},{"date":"2026-07-02","usdOz":4055.46,"eurUsd":1.1424},{"date":"2026-07-03","usdOz":4173.69,"eurUsd":1.1442},{"date":"2026-07-06","usdOz":4137.03,"eurUsd":1.1427},{"date":"2026-07-07","usdOz":4151.42,"eurUsd":1.1428},{"date":"2026-07-08","usdOz":4046.59,"eurUsd":1.1411},{"date":"2026-07-09","usdOz":4129.18,"eurUsd":1.1432},{"date":"2026-07-10","usdOz":4111.51,"eurUsd":1.1436},{"date":"2026-07-13","usdOz":4014.91,"eurUsd":1.1412},{"date":"2026-07-14","usdOz":4061.06,"eurUsd":1.142},{"date":"2026-07-15","usdOz":4038.63,"eurUsd":1.1444},{"date":"2026-07-16","usdOz":3992.37,"eurUsd":1.1454},{"date":"2026-07-17","usdOz":4018.09,"eurUsd":1.1438},{"date":"2026-07-20","usdOz":4011.91,"eurUsd":1.1426},{"date":"2026-07-21","usdOz":4072.04,"eurUsd":1.1413},{"date":"2026-07-22","usdOz":4147.29,"eurUsd":1.141},{"date":"2026-07-23","usdOz":4049.13,"eurUsd":1.14},{"date":"2026-07-24","usdOz":4068.2,"eurUsd":1.1383},{"date":"2026-07-27","usdOz":4075.85,"eurUsd":1.1393},{"date":"2026-07-28","usdOz":4038.52,"eurUsd":1.1379},{"date":"2026-07-29","usdOz":4047.87,"eurUsd":1.1423},{"date":"2026-07-30","usdOz":4106.69,"eurUsd":1.1486},{"date":"2026-07-31","usdOz":4046.84,"eurUsd":1.1502},{"date":"2026-08-03","usdOz":4053.36,"eurUsd":1.153},{"date":"2026-08-04","usdOz":4053.97,"eurUsd":1.1518},{"date":"2026-08-05","usdOz":4188.88,"eurUsd":1.1543},{"date":"2026-08-06","usdOz":4269.15,"eurUsd":1.1537},{"date":"2026-08-07","usdOz":4363.26,"eurUsd":1.1549},{"date":"2026-08-10","usdOz":4323.83,"eurUsd":1.1553},{"date":"2026-08-11","usdOz":4383.52,"eurUsd":1.1541},{"date":"2026-08-12","usdOz":4431.46,"eurUsd":1.1541},{"date":"2026-08-13","usdOz":4386.46,"eurUsd":1.1529},{"date":"2026-08-14","usdOz":4381.23,"eurUsd":1.1556},{"date":"2026-08-17","usdOz":4424.44,"eurUsd":1.1589},{"date":"2026-08-18","usdOz":4365.03,"eurUsd":1.1578},{"date":"2026-08-19","usdOz":4496.29,"eurUsd":1.1625},{"date":"2026-08-20","usdOz":4508.62,"eurUsd":1.169},{"date":"2026-08-21","usdOz":4623.72,"eurUsd":1.169},{"date":"2026-08-24","usdOz":4634.4,"eurUsd":1.1671},{"date":"2026-08-25","usdOz":4648.34,"eurUsd":1.1665},{"date":"2026-08-26","usdOz":4596.86,"eurUsd":1.166},{"date":"2026-08-27","usdOz":4606.87,"eurUsd":1.1648},{"date":"2026-08-28","usdOz":4466.78,"eurUsd":1.1618},{"date":"2026-08-31","usdOz":4431.82,"eurUsd":1.16},{"date":"2026-09-02","usdOz":4302.81,"eurUsd":1.1588},{"date":"2026-09-03","usdOz":4437.18,"eurUsd":1.1613},{"date":"2026-09-04","usdOz":4470.7,"eurUsd":1.1609},{"date":"2026-09-07","usdOz":4404.13,"eurUsd":1.1622},{"date":"2026-09-08","usdOz":4425.38,"eurUsd":1.1622},{"date":"2026-09-09","usdOz":4395.39,"eurUsd":1.1637},{"date":"2026-09-10","usdOz":4427.02,"eurUsd":1.1617},{"date":"2026-09-11","usdOz":4353.89,"eurUsd":1.1594},{"date":"2026-09-14","usdOz":4328.97,"eurUsd":1.1562},{"date":"2026-09-15","usdOz":4290.03,"eurUsd":1.154},{"date":"2026-09-16","usdOz":4328.04,"eurUsd":1.1509},{"date":"2026-09-17","usdOz":4309.49,"eurUsd":1.1477},{"date":"2026-09-18","usdOz":4392.54,"eurUsd":1.1473},{"date":"2026-09-21","usdOz":4353.57,"eurUsd":1.1479},{"date":"2026-09-22","usdOz":4322.82,"eurUsd":1.1454},{"date":"2026-09-23","usdOz":4326.6,"eurUsd":1.141},{"date":"2026-09-24","usdOz":4284.8,"eurUsd":1.1379},{"date":"2026-09-25","usdOz":4278.65,"eurUsd":1.139},{"date":"2026-09-28","usdOz":4155.68,"eurUsd":1.1372},{"date":"2026-09-29","usdOz":4141.92,"eurUsd":1.1343},{"date":"2026-09-30","usdOz":4196.89,"eurUsd":1.1351},{"date":"2026-10-01","usdOz":4202.3,"eurUsd":1.1276},{"date":"2026-10-02","usdOz":4162.3,"eurUsd":1.1253},{"date":"2026-10-05","usdOz":4156.8,"eurUsd":1.1211},{"date":"2026-10-06","usdOz":4187.1,"eurUsd":1.124},{"date":"2026-10-07","usdOz":4140.7,"eurUsd":1.1214},{"date":"2026-10-08","usdOz":4157,"eurUsd":1.1199},{"date":"2026-10-09","usdOz":4216.3,"eurUsd":1.1215},{"date":"2026-10-10","usdOz":4194.4,"eurUsd":1.1205},{"date":"2026-10-12","usdOz":4190.6,"eurUsd":1.1185},{"date":"2026-10-13","usdOz":4177.3,"eurUsd":1.1179},{"date":"2026-10-14","usdOz":4085.1,"eurUsd":1.1138},{"date":"2026-10-15","usdOz":4157.4,"eurUsd":1.1209},{"date":"2026-10-16","usdOz":4164.4,"eurUsd":1.1268},{"date":"2026-10-17","usdOz":4165.42,"eurUsd":1.1237}],"voix":["bi","calc","dorome","duuru","fila","fin","intro","kelen","keme","kononton","miliyon","mugan","n-15781","naani","ni","saba","seegin","tan","waa","wolonfila","woro"]}</script>
+<script id="main">
+(function(){
+const OZ=31.1034768, XOF_EUR=655.957;
+const AUTO_API="https://xaus.com/api/v1/spot?currency=XOF&unit=gram&compact=1";
+const AUTO_MS=15*60*1000;
+const KARATS=[24,23,22,21,20,19,18].map(k=>({k,lab:k+" carats",sub:""}));
+let S; try{S=JSON.parse(document.getElementById("state").textContent)}catch(e){S={usdOz:0,eurUsd:1.1,date:"",source:"",history:[]}}
+if(typeof S.prime!=="number") S.prime=0;
+if(!Array.isArray(S.ads)) S.ads=[];
+let adIdx=0, adTimer=null, assets=null;
+let autoTimer=null, liveWorldG=NaN, autoFetchedAt=0, autoUpdatedAt="", autoDataStatus="", autoErr="";
+let autoHistory=[];
+try{
+  const c=JSON.parse(localStorage.getItem("sanu_auto_gold")||"null");
+  if(c&&Number(c.worldG)>0){liveWorldG=Number(c.worldG);autoFetchedAt=Number(c.fetchedAt)||0;autoUpdatedAt=c.updatedAt||"";autoDataStatus=c.status||"";
+    if(Number(c.usdOz)>0) S.usdOz=Number(c.usdOz); if(Number(c.eurUsd)>0) S.eurUsd=Number(c.eurUsd);}
+  autoHistory=JSON.parse(localStorage.getItem("sanu_auto_history")||"[]"); if(!Array.isArray(autoHistory)) autoHistory=[];
+}catch(e){autoHistory=[]}
+if(autoHistory.length){const d=new Set(autoHistory.map(h=>h.date));S.history=(S.history||[]).filter(h=>!d.has(h.date)).concat(autoHistory)}
+let calc={grams:10,k:18}; try{const c=JSON.parse(localStorage.getItem("calc")||"null"); if(c){calc.grams=(c.grams>=0&&c.grams<=100000)?c.grams:calc.grams;calc.k=c.k??calc.k}}catch(e){}
+const fcfa=n=>Math.round(n).toLocaleString("fr-FR").replace(/\u202f/g," ")+" FCFA";
+const g24=()=>Number.isFinite(liveWorldG)&&liveWorldG>0?liveWorldG:S.usdOz/S.eurUsd/OZ*XOF_EUR;
+const world=k=>g24()*k/24;
+const perGram=k=>world(k)*(1+S.prime/100);
+const pct=p=>(p>0?"+":"")+String(p).replace(".",",")+" %";
+const fmtDate=d=>{try{return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}catch(e){return d}};
+const APP_URL="https://claude.ai/artifact/Py3Uv6ALWzKbYHDGqXYc7u";
+const WA_ICON='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>';
+const waLink=(tel,msg)=>{let n=String(tel).replace(/\D/g,""); if(n.length===8) n="223"+n; return "https://wa.me/"+n+"?text="+encodeURIComponent(msg)};
+const bam=n=>Math.round(n/5).toLocaleString("fr-FR").replace(/\u202f/g," ")+" Bam.";
+const shareText=()=>"Prix de l'or à Bamako ("+shortDate(S.date)+") : "+fcfa(perGram(24))+" ("+bam(perGram(24))+") le gramme 24 carats. Cours mondial : "+fcfa(world(24))+".\nCalculez la valeur de votre or avec Sanu Prix à Bamako : "+APP_URL;
+const IC=d=>'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+const btnSnd=muted=>IC('<path d="M11 5 6 9H3v6h3l5 4z"/>'+(muted?'<path d="m22 9-6 6M16 9l6 6"/>':'<path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'))+'<span class="lbl">'+(muted?"Activer le son":"Couper le son")+'</span>';
+const btnFs=on=>IC(on?'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>':'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')+'<span class="lbl">'+(on?"Quitter":"Plein écran")+'</span>';
+const PHONE=window.matchMedia?matchMedia("(max-width:520px)"):{matches:false};
+try{PHONE.addEventListener("change",()=>{renderAd();startAds()})}catch(e){}
+const SPK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const TTS=("speechSynthesis" in window)&&typeof SpeechSynthesisUtterance!=="undefined";
+function speakText(){const n=x=>String(Math.round(x));
+  return "Prix de l'or à Bamako, le "+fmtDate(S.date)+". Un gramme d'or 24 carats : "+n(perGram(24))+" francs CFA. Soit "+n(perGram(24)/5)+" doromé. Pour "+String(calc.grams).replace(".",",")+" grammes à "+String(calc.k).replace(".",",")+" carats : "+n(perGram(calc.k)*(calc.grams||0))+" francs CFA, soit "+n(perGram(calc.k)*(calc.grams||0)/5)+" doromé."}
+/* Voix en bambara : mots enregistrés par le propriétaire, assemblés selon la façon de compter en dɔrɔmɛ */
+const VOIX=new Set(S.voix||[]);
+const BD=[null,"kelen","fila","saba","naani","duuru","woro","wolonfila","seegin","kononton"];
+function bmComps(x){const c=[],h=Math.floor(x/100),t=Math.floor(x%100/10),u=x%10;
+  if(h) c.push(h===1?["keme"]:["keme",BD[h]]);
+  if(t) c.push(t===1?["tan"]:t===2?["mugan"]:["bi",BD[t]]);
+  if(u) c.push([BD[u]]); return c}
+const bmFlat=cs=>cs.reduce((a,c,i)=>a.concat(i?["ni"]:[],c),[]);
+function bmNumber(n){n=Math.round(n); if(n<1) return []; const C=[],m=Math.floor(n/1e6),t=Math.floor(n%1e6/1000),r=n%1000;
+  if(m) C.push(["miliyon"].concat(bmFlat(bmComps(m))));
+  if(t) C.push(["waa"].concat(bmFlat(bmComps(t))));
+  if(r) C.push(...bmComps(r));
+  C[C.length-1]=["dorome"].concat(C[C.length-1]); return bmFlat(C)}
+function bmSeq(){const q=[]; if(VOIX.has("intro")) q.push("intro");
+  const pb=Math.round(perGram(24)/5); if(VOIX.has("n-"+pb)) q.push("n-"+pb); else q.push(...bmNumber(pb)); const v=perGram(calc.k)*(calc.grams||0);
+  if(v>=5&&VOIX.has("calc")){q.push("_","calc",...bmNumber(v/5))} if(VOIX.has("fin")) q.push("_","fin"); return q}
+const bmReady=()=>{const need=new Set(["dorome","ni","keme","waa","tan","mugan","bi"].concat(BD.slice(1))); for(const k of need) if(!VOIX.has(k)) return false; return true};
+const bmCache={}; let bmRun=0;
+function stopBm(){bmRun++; for(const k in bmCache){try{bmCache[k].pause()}catch(e){}} const b=document.getElementById("listen-bm"); if(b) b.classList.remove("on")}
+function playBm(btn){ if(btn.classList.contains("on")){stopBm();return}
+  const run=++bmRun, seq=bmSeq(); btn.classList.add("on");
+  seq.forEach(k=>{if(k!=="_"&&!bmCache[k]){const a=new Audio("voix/"+k+".mp3"); a.preload="auto"; bmCache[k]=a}});
+  let i=0; const next=()=>{ if(run!==bmRun) return; if(i>=seq.length){btn.classList.remove("on");return}
+    const k=seq[i++]; if(k==="_"){setTimeout(next,350);return}
+    const a=bmCache[k]; a.currentTime=0; a.onended=()=>setTimeout(next,40); a.onerror=()=>setTimeout(next,40);
+    const p=a.play(); if(p&&p.catch) p.catch(()=>{btn.classList.remove("on")}) };
+  next()}
+function speak(btn){ if(!TTS) return; const ss=window.speechSynthesis;
+  if(ss.speaking){ss.cancel();btn.classList.remove("on");return}
+  const u=new SpeechSynthesisUtterance(speakText()); u.lang="fr-FR"; u.rate=.9;
+  const v=ss.getVoices().find(v=>/^fr/i.test(v.lang)); if(v) u.voice=v;
+  u.onend=u.onerror=()=>btn.classList.remove("on"); btn.classList.add("on"); ss.speak(u)}
+const baseSrc=x=>String(x||"").replace(/\s*·\s*mis à jour.*$/i,"").trim();
+const nowBamako=()=>{const d=new Date(); return String(d.getUTCHours()).padStart(2,"0")+" h "+String(d.getUTCMinutes()).padStart(2,"0")};
+const isoBamakoDate=d=>{try{return new Date(d||Date.now()).toISOString().slice(0,10)}catch(e){return new Date().toISOString().slice(0,10)}};
+const syncTime=()=>{if(!autoFetchedAt) return "";const d=new Date(autoFetchedAt);return String(d.getUTCHours()).padStart(2,"0")+" h "+String(d.getUTCMinutes()).padStart(2,"0")};
+function syncText(){
+  if(!navigator.onLine) return "Hors connexion · dernier cours conservé · reprise automatique au retour d’Internet";
+  if(autoErr) return "Actualisation automatique active · dernière tentative impossible · nouvel essai prévu";
+  if(autoFetchedAt) return "Actualisation auto toutes les 15 min · dernière synchro à "+syncTime();
+  return "Actualisation automatique toutes les 15 min · première synchronisation en cours";
+}
+function syncClass(){return navigator.onLine?(autoFetchedAt?"":"wait"):"off"}
+function cacheAuto(){try{localStorage.setItem("sanu_auto_gold",JSON.stringify({worldG:liveWorldG,fetchedAt:autoFetchedAt,updatedAt:autoUpdatedAt,status:autoDataStatus,usdOz:S.usdOz,eurUsd:S.eurUsd}));localStorage.setItem("sanu_auto_history",JSON.stringify(autoHistory.slice(-400)))}catch(e){}}
+function applyAutoGold(data){
+  const p=Number(data&&data.xau&&data.xau.price); if(!(p>0)) throw new Error("Prix automatique invalide");
+  liveWorldG=p; const usd=Number(data.xau.spot_usd_oz||data.spot_usd_oz); if(usd>0) S.usdOz=usd;
+  const fx=Number(data.xau.fx_rate); if(fx>0) S.eurUsd=XOF_EUR/fx;
+  autoUpdatedAt=data.updated_at||(data.data_state&&data.data_state.as_of)||new Date().toISOString();
+  autoDataStatus=(data.data_state&&data.data_state.status)||"fresh"; autoFetchedAt=Date.now(); autoErr="";
+  S.date=isoBamakoDate(autoUpdatedAt); S.source="XAUS · mise à jour automatique toutes les 15 min · "+nowBamako()+" (heure de Bamako)";
+  const h={date:S.date,usdOz:S.usdOz,eurUsd:S.eurUsd}; autoHistory=autoHistory.filter(x=>x.date!==h.date).concat([h]).sort((a,b)=>a.date<b.date?-1:1).slice(-400);
+  const dates=new Set(autoHistory.map(x=>x.date)); S.history=(S.history||[]).filter(x=>!dates.has(x.date)).concat(autoHistory).sort((a,b)=>a.date<b.date?-1:1);
+  cacheAuto();
+}
+function scheduleAuto(delay=AUTO_MS){clearTimeout(autoTimer);autoTimer=setTimeout(()=>autoRefreshGold(false),Math.max(1000,delay))}
+async function autoRefreshGold(force){
+  if(!navigator.onLine){autoErr="offline";scheduleAuto(AUTO_MS);render();return}
+  const age=Date.now()-autoFetchedAt; if(!force&&autoFetchedAt&&age<AUTO_MS){scheduleAuto(AUTO_MS-age);return}
+  try{
+    const r=await fetch(AUTO_API,{cache:"no-store",headers:{"Accept":"application/json"}}); if(!r.ok) throw new Error("HTTP "+r.status);
+    const data=await r.json(); applyAutoGold(data); render(); startAds(); scheduleAuto(AUTO_MS);
+  }catch(e){autoErr=String(e&&e.message||e); render(); scheduleAuto(AUTO_MS)}
+}
+const shortDate=d=>{try{return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}catch(e){return d}};
+/* Carte « L'or monte ou baisse ? » (style compact n° 5) : 4 cases de variation + mini-courbe de la période choisie */
+const PERIODS=[{d:7,l:"Sur 7 jours",c:"7 derniers jours"},{d:30,l:"Sur 1 mois",c:"Dernier mois"},{d:91,l:"Sur 3 mois",c:"3 derniers mois"},{d:183,l:"Sur 6 mois",c:"6 derniers mois"}];
+let trendDays=30; try{const t=+localStorage.getItem("trendDays"); if(PERIODS.some(p=>p.d===t)) trendDays=t}catch(e){}
+const histG=h=>h.usdOz/h.eurUsd/OZ*XOF_EUR;
+const longDate=d=>{try{const t=new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});return t.charAt(0).toUpperCase()+t.slice(1)}catch(e){return d}};
+const nk=n=>Math.round(n).toLocaleString("fr-FR").replace(/ /g," ");
+let trendRO=null;
+function periodPts(all,days){const last=all[all.length-1].date, from=new Date(new Date(last+"T12:00:00").getTime()-days*864e5).toISOString().slice(0,10);
+  let pts=all.filter(h=>h.date>=from); if(pts.length<2) pts=all.slice(-2); return pts}
+function drawTrend(){
+  const box=document.getElementById("trend"); if(!box) return;
+  const all=(S.history||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
+  if(all.length<2){box.hidden=true;return} box.hidden=false;
+  const tiles=PERIODS.map(p=>{const pts=periodPts(all,p.d), f=histG(pts[0]), e=histG(pts[pts.length-1]), pc=(e-f)/f*100, up=pc>=0;
+    return `<button type="button" class="tr-tile" data-td="${p.d}" aria-pressed="${p.d===trendDays}"><span class="tr-tl">${p.l}</span><span class="tr-tv ${up?"up":"down"}"><span aria-hidden="true">${up?"▲":"▼"}</span>&nbsp;${(up?"+":"−")+Math.abs(pc).toFixed(1).replace(".",",")}&nbsp;%</span></button>`}).join("");
+  const pts=periodPts(all,trendDays), v=pts.map(histG), lo=Math.min(...v), hi=Math.max(...v), per=PERIODS.find(p=>p.d===trendDays);
+  box.innerHTML=`<div class="tr-top"><h2 class="tr-h">Or 24 K · cours mondial</h2><span class="tr-cur num">${nk(g24())} <small>FCFA</small></span></div>
+    <div class="tr-tiles" role="group" aria-label="Choisir la période">${tiles}</div>
+    <div class="tr-mini"><span class="tr-cap">${per.c}</span>
+      <div class="tr-plot"><svg role="img" aria-label="Mini-courbe du prix, ${per.c} : de ${fcfa(v[0])} à ${fcfa(v[v.length-1])}"></svg><div class="tr-tip" hidden></div></div>
+      <div class="tr-hl"><span>Plus bas <b class="num">${nk(lo)}</b></span><span>Plus haut <b class="num">${nk(hi)}</b></span></div></div>
+    <p class="tr-upd">Prix de 1 g en FCFA<span class="hide-sm"> · mis à jour le ${esc(shortDate(pts[pts.length-1].date))}</span></p>`;
+  box.querySelectorAll("[data-td]").forEach(b=>b.onclick=()=>{trendDays=+b.dataset.td; try{localStorage.setItem("trendDays",trendDays)}catch(e){} drawTrend()});
+  const plot=box.querySelector(".tr-plot"), svg=plot.querySelector("svg"), tip=plot.querySelector(".tr-tip");
+  const paint=()=>{
+    const W=Math.max(160,plot.clientWidth), H=Math.max(40,plot.clientHeight), pad=6, span=(hi-lo)||hi*0.002;
+    const X=i=>pad+(W-2*pad)*(pts.length===1?0.5:i/(pts.length-1)), Y=y=>pad+(H-2*pad)*(1-(y-lo)/span);
+    const line=v.map((y,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(y).toFixed(1)).join(" ");
+    const iLo=v.indexOf(lo), iHi=v.indexOf(hi), n=v.length-1;
+    svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("width",W); svg.setAttribute("height",H);
+    svg.innerHTML=`<path class="tr-line" d="${line}"/>
+      <circle class="tr-hi" cx="${X(iHi).toFixed(1)}" cy="${Y(hi).toFixed(1)}" r="3"/><circle class="tr-lo" cx="${X(iLo).toFixed(1)}" cy="${Y(lo).toFixed(1)}" r="3"/>
+      <circle class="tr-end" cx="${X(n).toFixed(1)}" cy="${Y(v[n]).toFixed(1)}" r="4.5"/>
+      <line class="tr-cross" x1="0" x2="0" y1="0" y2="${H}" visibility="hidden"/><circle class="tr-dot" r="5" visibility="hidden"/>
+      <rect class="tr-hit" x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+    const cross=svg.querySelector(".tr-cross"), dot=svg.querySelector(".tr-dot"), hit=svg.querySelector(".tr-hit");
+    const show=ev=>{const r=svg.getBoundingClientRect(), cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+      let i=Math.round((cx-pad)/((W-2*pad)||1)*n); i=Math.max(0,Math.min(n,i));
+      const x=X(i), y=Y(v[i]); cross.setAttribute("x1",x); cross.setAttribute("x2",x); cross.setAttribute("visibility","visible");
+      dot.setAttribute("cx",x); dot.setAttribute("cy",y); dot.setAttribute("visibility","visible");
+      tip.hidden=false; tip.innerHTML=`<span>${esc(longDate(pts[i].date))}</span><span class="num tv">${fcfa(v[i])}</span><span class="num tb">${bam(v[i])}</span>`;
+      const tw=tip.offsetWidth, th=tip.offsetHeight; let tx=x+12; if(tx+tw>W) tx=x-12-tw; tip.style.left=Math.max(0,tx)+"px"; tip.style.top=Math.max(-th/2,Math.min(H-th/2,y-th/2))+"px"};
+    const hide=()=>{cross.setAttribute("visibility","hidden"); dot.setAttribute("visibility","hidden"); tip.hidden=true};
+    hit.addEventListener("pointermove",show); hit.addEventListener("pointerdown",show); hit.addEventListener("pointerleave",hide);
+    hit.addEventListener("touchmove",e=>{show(e)},{passive:true});
+  };
+  paint();
+  try{ if(trendRO) trendRO.disconnect(); trendRO=new ResizeObserver(()=>paint()); trendRO.observe(plot) }catch(e){ window.addEventListener("resize",paint) }
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const app=document.getElementById("app");
+
+function render(){
+  S.history=(S.history||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
+  const prev=S.history.length>1?S.history[S.history.length-2]:null;
+  let delta=""; if(prev){const p=prev.usdOz/prev.eurUsd/OZ*XOF_EUR, d=(g24()-p)/p*100; delta=`<span class="chip">${d>=0?"▲":"▼"} ${Math.abs(d).toFixed(2).replace(".",",")} % depuis le ${esc(shortDate(prev.date))}</span>`}
+  app.innerHTML=`
+  <header><span class="eyebrow">Cours de l'or en FCFA · Bamako, Mali</span><h1>Sanu Prix à Bamako</h1></header>
+  <div class="hero" aria-live="polite">
+    <span class="eyebrow">Prix à Bamako · 1 g d'or 24 carats</span>
+    <div class="big num">${fcfa(perGram(24)).replace(" FCFA","")} <small>FCFA</small></div>
+    <div class="bigbam num">${bam(perGram(24)).replace(" Bam.","")} <small>Bam.</small></div>
+    <div class="meta">Cours mondial : <span class="num">${fcfa(world(24))}</span> <span class="num" style="white-space:nowrap">(${bam(world(24))})</span> · prime locale ${pct(S.prime)}</div>
+    <div class="chips"><span class="chip num hide-sm">${S.usdOz.toLocaleString("fr-FR")} $/once</span><span class="chip num hide-sm">1 € = ${String(S.eurUsd).replace(".",",")} $</span>${delta}</div>
+    <div class="meta">Cours du <span class="hide-sm">${esc(fmtDate(S.date))} · ${esc(S.source)}</span><span class="show-sm">${esc(shortDate(S.date))}${(/(\d{1,2} h \d{2})/.exec(S.source)||[])[1]?" à "+/(\d{1,2} h \d{2})/.exec(S.source)[1]:""} · auto 15 min</span></div>
+  </div>
+  <div class="syncbar ${syncClass()}"><span class="syncdot" aria-hidden="true"></span><span>${esc(syncText())}</span></div>
+  <div class="cta">
+    <a class="btn-wa" href="${esc(waLink("+22379313471","Bonjour DIARRA OR, je vous contacte depuis l'application Sanu Prix à Bamako. Je voudrais connaître votre prix pour l'or."))}" target="_blank" rel="noopener">${WA_ICON} WhatsApp</a>
+    <a class="btn-wa share" href="https://wa.me/?text=${encodeURIComponent(shareText())}" target="_blank" rel="noopener">${WA_ICON} <span>Partager le prix<span class="hide-sm"> du jour</span></span></a>
+    <a class="btn-calc" href="calculatrice.html#prix=${Math.round(perGram(24))}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg> Calculatrice</a>
+  </div>
+  <section id="trend" class="trend" aria-label="Évolution du prix de l'or"></section>
+  <section id="ads" aria-label="Annonces" aria-live="off"></section>
+  <section class="calcsec"><h2>Calculer la valeur<span class="hide-sm"> de votre or</span></h2>
+    <div class="panel calc">
+      <div class="seg karats" role="group" aria-label="Carat">${KARATS.map(x=>`<button type="button" data-k="${x.k}" aria-pressed="${x.k===calc.k}" aria-label="${x.k} carats">${x.k} K</button>`).join("")}</div>
+      <div class="inputs">
+      <label for="carat">Carat<span class="hide-sm"> (ex. 21,40)</span><input placeholder="21,40" id="carat" type="text" inputmode="decimal" autocomplete="off" value="${String(calc.k).replace(".",",")}"></label>
+      <label for="grams">Poids (g)<input id="grams" type="text" inputmode="decimal" autocomplete="off" maxlength="9" placeholder="10" value="${String(calc.grams).replace(".",",")}"></label>
+      </div>
+      <p class="note" id="purity"></p>
+      <div class="result"><span class="lab">Prix du gramme<span class="hide-sm"> à ce carat</span></span><span class="amt"><span class="num" id="outg"></span><span class="bam num" id="outg-b"></span></span></div>
+      <div class="result"><span class="lab">Valeur<span class="hide-sm"> au prix de Bamako</span><span class="show-sm"> à Bamako</span></span><span class="amt"><span class="val num" id="out"></span><span class="bam bam-main num" id="out-b"></span></span></div>
+      <div class="result r-world"><span class="lab">Valeur au cours mondial</span><span class="amt"><span class="num" id="outw"></span><span class="bam num" id="outw-b"></span></span></div>
+      <p class="note bamnote">Bam. = <i>dɔrɔmɛ</i> : 1 Bam. = 5 F CFA (1 000 F CFA = 200 Bam.).</p>
+    </div>
+  </section>
+  <section id="hist-sec" class="histc" ${S.history.length>1?"":"hidden"}><h2>Historique · 1 g 24 K, cours mondial</h2>
+    <div class="panel"><ul class="hist">${S.history.slice(-5).reverse().map(h=>{const g=h.usdOz/h.eurUsd/OZ*XOF_EUR;return `<li><span>${esc(shortDate(h.date))}</span><span class="num">${fcfa(g)}</span><span class="num bamc">${bam(g)}</span></li>`}).join("")}</ul></div>
+  </section>
+  <section id="admin" hidden>
+    <details class="panel"><summary>Mettre à jour le cours</summary>
+      <div class="row">
+        <label for="u-usd">Or ($ par once)<input id="u-usd" type="number" step="0.1" value="${S.usdOz}"></label>
+        <label for="u-eur">1 € = ? $<input id="u-eur" type="number" step="0.0001" value="${S.eurUsd}"></label>
+        <label for="u-date">Date<input id="u-date" type="date" value="${new Date().toISOString().slice(0,10)}" max="${new Date().toISOString().slice(0,10)}"></label>
+        <label for="u-prime">Prime Bamako (%)<input id="u-prime" type="number" inputmode="decimal" step="0.05" value="${S.prime}"></label>
+      </div>
+      <p class="note">Prime = (prix relevé à Bamako ÷ cours mondial − 1) × 100. Exemple : 79 700 ÷ 79 030 → +0,85 %.</p>
+      <label for="u-src">Source<input id="u-src" type="text" value="${esc(baseSrc(S.source))}"></label>
+      <button class="btn" id="save" type="button">Publier le nouveau cours</button>
+      <p class="msg" id="smsg"></p>
+      <p class="note">Cours en direct : <a href="https://www.kitco.com/charts/gold" target="_blank" rel="noopener">Kitco</a> · taux euro/dollar : <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener">BCE</a>. Le FCFA est fixé à 655,957 F pour 1 €.</p>
+    </details>
+    <details class="panel ads-admin"><summary>Gérer les annonces (${S.ads.length})</summary>
+      <ul class="adlist">${S.ads.length?S.ads.map((a,i)=>`<li class="${a.on===false?"off":""}"><span>${esc(a.title)}${a.video?" · vidéo":""}${a.on===false?" · masquée":""}</span><span class="seg"><button type="button" class="mini" data-toggle="${i}">${a.on===false?"Afficher":"Masquer"}</button><button type="button" class="mini danger" data-del="${i}">Supprimer</button></span></li>`).join(""):`<li><span>Aucune annonce pour l'instant.</span></li>`}</ul>
+      <h2>Nouvelle annonce</h2>
+      <label for="a-title">Nom de l'annonceur<input id="a-title" type="text" maxlength="60" placeholder="Bijouterie Kéita, Marché Rose"></label>
+      <label for="a-text">Message<textarea id="a-text" maxlength="160" placeholder="Achat et vente d'or 18 et 24 carats. Bijoux sur commande."></textarea></label>
+      <label for="a-tel">Téléphone<input id="a-tel" type="tel" maxlength="30" placeholder="+223 …"></label>
+      <label for="a-img" id="a-img-wrap" hidden>Photo, logo ou vidéo (facultatif)<input id="a-img" type="file" accept="image/*,video/mp4,video/webm,video/quicktime"></label>
+      <button class="btn" id="a-add" type="button">Ajouter l'annonce</button>
+      <p class="msg" id="amsg"></p>
+      <p class="note">Les annonces avec photo restent 6 secondes ; une annonce vidéo reste jusqu'à la fin de la vidéo. Vidéo : 20 Mo maximum, de préférence moins de 30 secondes pour les connexions mobiles.</p>
+    </details>
+  </section>
+  <p class="note disclaimer"><span class="hide-sm">Prix indicatif : cours mondial converti en FCFA plus la prime locale relevée. Sans frais d'affinage ni façon du bijoutier.</span><span class="show-sm">Prix indicatif, hors frais d'affinage et façon.</span></p>`;
+  bind(); updateOut(); renderAd(); drawTrend(); if(typeof fitPhone==="function") fitPhone();
+}
+function liveAds(){return S.ads.filter(a=>a.on!==false)}
+function renderAd(){
+  const box=document.getElementById("ads"); if(!box) return;
+  if(PHONE.matches){box.innerHTML="";box.hidden=true;clearTimeout(adTimer);return} box.hidden=false;
+  const L=liveAds();
+  if(!L.length){box.innerHTML=`<div class="ad empty">Espace publicitaire disponible · Faites connaître votre commerce ici</div>`;return}
+  if(adIdx>=L.length) adIdx=0;
+  const a=L[adIdx];
+  const still=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const src=a.video||a.img;
+  box.innerHTML=`<div class="ad"><span class="tag">Annonce</span>
+    ${src?`<div class="media">${a.video?`<canvas class="bg" width="32" height="18" aria-hidden="true"></canvas><video class="main" src="${esc(a.video)}" muted playsinline preload="metadata" ${still?"controls":"autoplay"} ${L.length>1?"":"loop"}></video><button type="button" class="snd" aria-label="Activer le son">${btnSnd(true)}</button>`:`<div class="bg" style="background-image:url('${esc(a.img)}')" aria-hidden="true"></div><img class="main" src="${esc(a.img)}" alt="${esc(a.title)}">`}<button type="button" class="fs" aria-label="Plein écran">${btnFs(false)}</button></div>`:""}
+    <div class="slide">
+      <div><p class="t">${esc(a.title)}</p>${a.text?`<p class="d">${esc(a.text)}</p>`:""}
+      ${a.tel?`<p class="tel"><b>${esc(a.tel)}</b><a href="tel:${esc(a.tel.replace(/[^+\d]/g,""))}">Appeler</a></p>`:""}</div></div>
+    ${L.length>1?`<div class="dots">${L.map((_,i)=>`<button type="button" data-ad="${i}" aria-label="Annonce ${i+1}" aria-current="${i===adIdx}"></button>`).join("")}</div>`:""}</div>`;
+  box.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>{adIdx=+b.dataset.ad;renderAd();startAds()});
+  const v=box.querySelector("video"), snd=box.querySelector(".snd");
+  const med=box.querySelector(".media");
+  if(med){
+    const el=med.querySelector(".main"), ratio=(w,h)=>{if(w&&h) med.style.aspectRatio=w+"/"+h};
+    if(a.video){
+      if(el.readyState>=1) ratio(el.videoWidth,el.videoHeight); else el.addEventListener("loadedmetadata",()=>ratio(el.videoWidth,el.videoHeight));
+      const cv=med.querySelector("canvas.bg"), cx=cv&&cv.getContext&&cv.getContext("2d");
+      if(cx){const tick=()=>{if(!el.isConnected) return; try{cx.drawImage(el,0,0,32,18)}catch(e){} setTimeout(tick,400)}; el.addEventListener("loadeddata",tick,{once:true})}
+    } else { if(el.complete&&el.naturalWidth) ratio(el.naturalWidth,el.naturalHeight); else el.addEventListener("load",()=>ratio(el.naturalWidth,el.naturalHeight)) }
+    const fs=med.querySelector(".fs"), req=med.requestFullscreen||med.webkitRequestFullscreen;
+    if(!req) fs.hidden=true;
+    else fs.onclick=()=>{ if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document); fs.innerHTML=btnFs(false);fs.setAttribute("aria-label","Plein écran")} else {const r=req.call(med); fs.innerHTML=btnFs(true);fs.setAttribute("aria-label","Quitter le plein écran"); if(r&&r.catch) r.catch(()=>{fs.innerHTML=btnFs(false)})} };
+  }
+  if(v){
+    v.addEventListener("ended",nextAd);
+    v.addEventListener("error",()=>{clearTimeout(adTimer);adTimer=setTimeout(nextAd,6000)});
+    const p=v.play&&!v.hasAttribute("controls")?v.play():null; if(p&&p.catch) p.catch(()=>{v.setAttribute("controls","")});
+    if(snd) snd.onclick=()=>{v.muted=!v.muted; snd.innerHTML=btnSnd(v.muted); snd.setAttribute("aria-label",v.muted?"Activer le son":"Couper le son"); if(v.paused){const q=v.play(); if(q&&q.catch) q.catch(()=>{})}};
+  }
+}
+function nextAd(){const L=liveAds(); if(L.length<2) return; adIdx=(adIdx+1)%L.length; renderAd(); startAds()}
+function startAds(){
+  clearTimeout(adTimer); if(PHONE.matches) return; const L=liveAds(); if(L.length<2) return;
+  const a=L[adIdx<L.length?adIdx:0];
+  adTimer=setTimeout(nextAd, a&&a.video?120000:6000);
+}
+function updateOut(){const g=document.getElementById("outg"),pu=document.getElementById("purity"); if(g) g.textContent=fcfa(perGram(calc.k)); if(pu) pu.textContent="Pureté "+(calc.k/24*1000).toFixed(1).replace(".",",")+" ‰ · prix 24 carats × "+String(calc.k).replace(".",",")+" ÷ 24";
+const o=document.getElementById("out"),w=document.getElementById("outw"); if(o) o.textContent=fcfa(perGram(calc.k)*(calc.grams||0)); if(w) w.textContent=fcfa(world(calc.k)*(calc.grams||0));
+const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=bam(v)};
+const fit=()=>{["out","out-b","outg","outg-b","outw","outw-b"].forEach(id=>{const e=document.getElementById(id); if(!e) return; const n=e.textContent.length; e.style.fontSize=n>17?".76em":n>14?".86em":""})}; set("outg-b",perGram(calc.k)); set("out-b",perGram(calc.k)*(calc.grams||0)); set("outw-b",world(calc.k)*(calc.grams||0)); fit()}
+function keep(){try{localStorage.setItem("calc",JSON.stringify(calc))}catch(e){}}
+function bind(){
+  const lb=document.getElementById("listen"); if(lb&&TTS){lb.hidden=false; lb.onclick=()=>{stopBm();speak(lb)}}
+  const bb=document.getElementById("listen-bm"); if(bb&&bmReady()){bb.hidden=false; bb.onclick=()=>{if(TTS) speechSynthesis.cancel(); document.getElementById("listen")?.classList.remove("on"); playBm(bb)}}
+  app.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{calc.k=+b.dataset.k;keep();render()});
+  const ci=document.getElementById("carat"); ci.oninput=()=>{const k=parseFloat(ci.value.replace(",","."));
+    if(k>=1&&k<=24){calc.k=k;ci.removeAttribute("aria-invalid");keep();updateOut();app.querySelectorAll("[data-k]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.k===k)))}
+    else ci.setAttribute("aria-invalid","true")};
+  const gi=document.getElementById("grams"); gi.oninput=()=>{const g=parseFloat(gi.value.replace(/\s/g,"").replace(",","."));
+    if(gi.value.trim()===""){calc.grams=0;gi.removeAttribute("aria-invalid")}
+    else if(g>=0&&g<=100000){calc.grams=g;gi.removeAttribute("aria-invalid")}
+    else {gi.setAttribute("aria-invalid","true");return}
+    keep();updateOut()};
+  if(window._art) document.getElementById("admin").hidden=false;
+  if(assets) document.getElementById("a-img-wrap").hidden=false;
+  const sv=document.getElementById("save"); if(sv) sv.onclick=save;
+  const ab=document.getElementById("a-add"); if(ab) ab.onclick=addAd;
+  app.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{const N=clone();const a=N.ads[+b.dataset.toggle];a.on=a.on===false;publishState(N,document.getElementById("amsg"),b,"Annonce mise à jour.")});
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirmer la suppression";return}
+    const N=clone();N.ads.splice(+b.dataset.del,1);publishState(N,document.getElementById("amsg"),b,"Annonce supprimée.")});
+}
+function clone(){return JSON.parse(JSON.stringify(S))}
+async function addAd(){
+  const m=document.getElementById("amsg"), btn=document.getElementById("a-add");
+  const title=document.getElementById("a-title").value.trim(), text=document.getElementById("a-text").value.trim(), tel=document.getElementById("a-tel").value.trim();
+  const f=document.getElementById("a-img").files[0];
+  if(!title){m.className="msg err";m.textContent="Indiquez au moins le nom de l'annonceur.";return}
+  const ad={id:Date.now().toString(36),title,text,tel,img:"",on:true};
+  const isVid=!!(f&&f.type&&f.type.indexOf("video/")===0);
+  if(f&&f.size>20*1024*1024){m.className="msg err";m.textContent=(isVid?"La vidéo":"L'image")+" fait plus de 20 Mo. Choisissez un fichier plus léger, ou une vidéo plus courte.";return}
+  btn.disabled=true;
+  if(f&&assets){
+    m.className="msg";m.textContent=isVid?"Envoi de la vidéo… (cela peut prendre une minute)":"Envoi de l'image…";
+    try{const r=await assets.upload(f); if(isVid) ad.video=r.url; else ad.img=r.url}
+    catch(e){btn.disabled=false;m.className="msg err";m.textContent=(isVid?"La vidéo":"L'image")+" n'a pas pu être envoyée. Vérifiez la connexion et réessayez, ou ajoutez l'annonce sans fichier.";return}
+  }
+  const N=clone();N.ads.push(ad);publishState(N,m,btn,"Annonce ajoutée.");
+}
+const RESET='*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}';
+async function save(){
+  const m=document.getElementById("smsg"), btn=document.getElementById("save");
+  const usd=parseFloat(document.getElementById("u-usd").value), eur=parseFloat(document.getElementById("u-eur").value);
+  const date=document.getElementById("u-date").value, src=document.getElementById("u-src").value.trim();
+  const prime=parseFloat(document.getElementById("u-prime").value);
+  if(!(usd>500&&usd<50000)||!(eur>0.5&&eur<3)||!date||!(prime>-20&&prime<20)){m.className="msg err";m.textContent="Vérifiez le prix en $ par once, le taux euro/dollar, la date et la prime (entre −20 et +20 %).";return}
+  const N=clone(); N.usdOz=usd;N.eurUsd=eur;N.date=date;N.source=(baseSrc(src)||"Mise à jour manuelle")+" · mis à jour à "+nowBamako()+" (heure de Bamako)";N.prime=prime;
+  N.history=(N.history||[]).filter(h=>h.date!==date).concat([{date,usdOz:usd,eurUsd:eur}]).sort((a,b)=>a.date<b.date?-1:1).slice(-400);
+  publishState(N,m,btn,"Cours publié.");
+}
+async function publishState(N,m,btn,okText){
+  const css=document.getElementById("pagecss").textContent, js=document.getElementById("main").textContent;
+  const fonts='';
+  const body="<title>Sanu Prix à Bamako</title>\n<style id=\"pagecss\">"+css+"</style>\n"+fonts+'\n<div id="app"></div>\n<script type="application/json" id="state">'+JSON.stringify(N).replace(/</g,"\\u003c")+"<\/script>\n<script id=\"main\">"+js+"<\/script>";
+  const doc='<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+RESET+'</style></head><body>'+body+'</body></html>';
+  btn.disabled=true; m.className="msg"; m.textContent="Publication…";
+  try{await window._art.publish(doc); m.className="msg ok"; m.textContent=okText}
+  catch(e){btn.disabled=false; m.className="msg err";
+    m.textContent=e&&e.code==="conflict"?"Une autre modification vient d'être publiée : la page se recharge.":"Vous n'avez pas le droit de modifier cette page."}
+}
+render(); startAds();
+window.addEventListener("online",()=>{autoErr="";autoRefreshGold(true)});
+window.addEventListener("offline",()=>{autoErr="offline";render()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!autoFetchedAt||Date.now()-autoFetchedAt>=AUTO_MS)) autoRefreshGold(false)});
+if(!autoFetchedAt||Date.now()-autoFetchedAt>=AUTO_MS) autoRefreshGold(false); else scheduleAuto(AUTO_MS-(Date.now()-autoFetchedAt));
+/* Téléphone : si l'écran est trop petit pour tout afficher, on réduit légèrement le texte jusqu'à ce que tout tienne */
+var fitBusy=false;
+function fitPhone(){ if(fitBusy) return; fitBusy=true; const de=document.documentElement; de.style.fontSize="";
+  if(PHONE.matches&&!matchMedia("(orientation:landscape) and (max-height:480px)").matches){
+    let f=parseFloat(getComputedStyle(de).fontSize), n=0;
+    while(de.scrollHeight>window.innerHeight+1&&f>12&&n<60){f-=0.5;n++;de.style.fontSize=f+"px"}
+  }
+  fitBusy=false}
+fitPhone(); var fitT=null; window.addEventListener("resize",()=>{clearTimeout(fitT);fitT=setTimeout(fitPhone,120)});
+try{ if(window.claude&&claude.use){
+  claude.use("artifact").then(a=>{ if(a){window._art=a; const ad=document.getElementById("admin"); if(ad) ad.hidden=false} }).catch(()=>{});
+  claude.use("assets").then(a=>{ if(a){assets=a; const w=document.getElementById("a-img-wrap"); if(w) w.hidden=false} }).catch(()=>{});
+} }catch(e){}
+})();
+</script>
+<script>
+/* Application installable : service worker + images d'annonces hébergées sur claude.ai masquées si indisponibles */
+document.addEventListener("error",function(e){var t=e.target;if(t&&(t.tagName==="IMG"||t.tagName==="VIDEO")){var m=t.closest(".media");if(m)m.style.display="none"}},true);
+</script>
+</body></html>

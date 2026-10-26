@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.sanuprix.bamako'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.sanuprix.bamako"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+// Aucune bibliothèque externe : l'application n'utilise que le WebView d'Android.
+dependencies {
+}
