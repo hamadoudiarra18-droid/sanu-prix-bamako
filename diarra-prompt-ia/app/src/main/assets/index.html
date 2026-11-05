@@ -60,6 +60,12 @@ header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;
 .crow .grow{flex:1}
 .chip{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:.92rem;color:var(--muted)}
 .chip b{color:var(--text);font-weight:600}
+.gpt{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:99px;border:1px solid var(--gold);color:var(--gold);font-size:.9rem;font-weight:600}
+#pasteBar{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--gold)}
+#pasteBar small{flex:1}
+.crow>*{flex:none}.crow .grow{flex:1 1 0;min-width:0}
+@media (max-width:400px){.crow{gap:6px}.chip{padding:10px 10px;gap:5px;font-size:.85rem}.gpt{padding:10px 10px}.crow .round{width:40px;height:40px}}
+@media (max-width:340px){#chipKind{display:none}}
 .send{width:50px;height:50px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center}
 .send:disabled{background:var(--panel2);color:#5d6f65}
 
@@ -122,6 +128,7 @@ header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
   <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
   <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></symbol>
   <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></symbol>
 </svg>
 
@@ -168,9 +175,15 @@ header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;
       <small>Image de départ : la vidéo commencera par elle.</small>
       <button class="round" id="clearStart" aria-label="Retirer l'image"><svg class="icon"><use href="#i-x"/></svg></button>
     </div>
+    <div id="pasteBar" class="hidden">
+      <small>Prompt prêt dans ChatGPT&nbsp;? Copiez-le, puis&nbsp;:</small>
+      <button class="btn gold" id="pasteGpt" style="padding:8px 14px">Coller</button>
+      <button class="round" id="closePaste" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
     <textarea id="prompt" rows="1" placeholder="Décrivez votre idée…"></textarea>
     <div class="crow">
       <button class="round" id="plusBtn" aria-label="Ajouter"><svg class="icon"><use href="#i-plus"/></svg></button>
+      <button class="gpt" id="gptBtn"><svg class="icon" style="width:18px;height:18px"><use href="#i-spark"/></svg>ChatGPT</button>
       <div class="grow"></div>
       <button class="chip" id="settingsChip"><span id="chipKind">Image</span><b id="chipRatio">9:16</b><b id="chipCount">×1</b></button>
       <button class="send" id="sendBtn" aria-label="Générer" disabled><svg class="icon"><use href="#i-send"/></svg></button>
@@ -485,6 +498,7 @@ function findItem(id){ for(const p of state.projects){ const it=p.items.find(i=>
 // Le côté Android appelle cette fonction pour chaque nouvelle étape.
 window.diarraApiResult=function(raw){
   let e; try{ e=typeof raw==="string"?JSON.parse(raw):raw; }catch(err){ return; }
+  if(e.kind==="assistant"){ toast(e.message); hide("pasteBar"); return; }
   if(e.kind==="simple"||e.kind==="library"){ montageEvent(e); return; }
   const [p,it]=findItem(e.sceneId); if(!it) return;
   if(e.status==="saved"){ toast(e.message); return; }
@@ -507,6 +521,47 @@ function syncTasks(){
   save(); if(current) renderProject();
   try{ N.resumePending(); }catch(e){}
 }
+
+/* ---------- Assistant ChatGPT ---------- */
+let gptPending=false;
+function gptRequest(idea){
+  const m=model(S.kind,S[S.kind]); const video=S.kind==="video"; const fromImage=video&&!!startImage;
+  const lines=[
+    "Tu es un expert en prompts pour la génération "+(video?"de vidéos":"d'images")+" par IA.",
+    "Écris UN SEUL prompt, prêt à copier, à partir de mon idée ci-dessous.",
+    "Réponds uniquement avec le prompt, sans titre, sans explication et sans guillemets autour.",
+    "Rédige-le en anglais (meilleurs résultats), en un seul paragraphe de 60 à 120 mots.",
+    "Format : "+S.ratio+(S.ratio==="9:16"?" (vertical, téléphone)":S.ratio==="16:9"?" (horizontal)":"")+". Modèle : "+m.name+"."
+  ];
+  if(video){
+    lines.push("Durée : "+(m.id==="veo31-fast"?"8":"5")+" secondes. Décris l'action du début à la fin, le mouvement de caméra (travelling, zoom, panoramique ou plan fixe), la lumière et l'ambiance.");
+    if(fromImage) lines.push("La vidéo démarre à partir d'une image existante : ne redécris pas toute la scène, concentre-toi sur le mouvement des personnages et de la caméra.");
+    if(m.sound) lines.push("Le modèle crée le son : ajoute les bruits d'ambiance. Si quelqu'un parle, garde sa phrase EN FRANÇAIS entre guillemets, courte (une phrase), et précise le type de voix.");
+    else lines.push("Le modèle ne crée pas de son : ne décris ni dialogue ni bruit.");
+  } else {
+    lines.push("Précise le sujet, la composition, le cadrage, la lumière, les couleurs, le style (photo réaliste, illustration…) et les détails importants.");
+  }
+  lines.push("Contexte : l'application est utilisée au Mali ; respecte les détails culturels si l'idée s'y rapporte.");
+  lines.push("","Mon idée : "+idea);
+  return lines.join("\n");
+}
+$("gptBtn").onclick=()=>{
+  const idea=promptEl.value.trim();
+  if(!idea){ toast("Écrivez d'abord votre idée en quelques mots, puis touchez ChatGPT."); promptEl.focus(); return; }
+  if(!N){ toast("Fonction disponible dans l'application Android."); return; }
+  const r=N.openChatGPT(gptRequest(idea));
+  if(r!=="ok"){ toast(r); return; }
+  gptPending=true; show("pasteBar");
+  toast("Demande copiée. Si ChatGPT ne l'affiche pas, collez-la dans sa zone de message.");
+};
+$("pasteGpt").onclick=()=>{
+  const t=(N&&N.readClipboard()||"").trim();
+  if(!t){ toast("Rien à coller : copiez d'abord le prompt dans ChatGPT."); return; }
+  if(/^Tu es un expert en prompts/.test(t)){ toast("C'est encore la demande : copiez la RÉPONSE de ChatGPT."); return; }
+  promptEl.value=t.replace(/^["«\s]+|["»\s]+$/g,""); promptEl.oninput(); hide("pasteBar"); gptPending=false;
+  toast("Prompt collé. Vérifiez les réglages puis touchez la flèche.");
+};
+$("closePaste").onclick=()=>{ hide("pasteBar"); gptPending=false; };
 
 /* ---------- Visionneuse ---------- */
 function openViewer(it){

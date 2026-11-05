@@ -1,6 +1,8 @@
 package com.diarra.promptia;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -769,6 +771,32 @@ public class MainActivity extends Activity {
     }
     private static String sanitize(String name){return name==null?"document.txt":name.replaceAll("[^A-Za-z0-9._-]","_").substring(0,Math.min(80,name.length()));}
     public class NativeFal {
+        // V11 : assistant de prompt. Ouvre ChatGPT (application ou navigateur) avec la demande préparée,
+        // et la copie aussi dans le presse-papiers au cas où ChatGPT ne la remplit pas tout seul.
+        @JavascriptInterface public String openChatGPT(String text){
+            if(text==null||text.trim().isEmpty()||text.length()>6000)return "Texte vide ou trop long";
+            runOnUiThread(()->{
+                try{
+                    ClipboardManager cm=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                    if(cm!=null)cm.setPrimaryClip(ClipData.newPlainText("DIARRA",text));
+                    Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse("https://chatgpt.com/?q="+Uri.encode(text)));
+                    i.addCategory(Intent.CATEGORY_BROWSABLE);
+                    startActivity(i);
+                }catch(Exception e){
+                    event("","","assistant","error","Impossible d'ouvrir ChatGPT : installez l'application ChatGPT ou un navigateur.",null,null);
+                }
+            });
+            return "ok";
+        }
+        @JavascriptInterface public String readClipboard(){
+            try{
+                ClipboardManager cm=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                if(cm==null||!cm.hasPrimaryClip()||cm.getPrimaryClip()==null||cm.getPrimaryClip().getItemCount()==0)return "";
+                CharSequence t=cm.getPrimaryClip().getItemAt(0).coerceToText(MainActivity.this);
+                if(t==null)return "";
+                String v=t.toString();return v.length()>16000?v.substring(0,16000):v;
+            }catch(Exception e){return "";}
+        }
         @JavascriptInterface public String simpleStatus(){return MainActivity.this.simpleStatus();}
         @JavascriptInterface public void chooseSimpleVoice(){runOnUiThread(()->{
             try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);
