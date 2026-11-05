@@ -252,13 +252,60 @@ public class MainActivity extends Activity {
             "DONE".equals(state)?"done":"FAILED".equals(state)?"error":"PAUSED".equals(state)||"UNKNOWN".equals(state)?"paused":"progress",
             message,url,o.optString("requestId"));
     }
-    // Une clé stable par scène empêche le renvoi facturable lors des doubles clics et réouvertures.
-    private String launch(boolean image,String sceneId,String index,String prompt,String imageUrl,String format){
+    // V11 : modèles autorisés. Seuls ces services fal.ai peuvent être appelés depuis la page.
+    private static final class Model {
+        final String textEndpoint,imageEndpoint,kind;
+        Model(String t,String i,String k){textEndpoint=t;imageEndpoint=i;kind=k;}
+    }
+    private static final Map<String,Model> MODELS=new HashMap<>();
+    static {
+        MODELS.put("flux-schnell",new Model("fal-ai/flux/schnell",null,"image"));
+        MODELS.put("nano-banana-2",new Model("fal-ai/nano-banana-2",null,"image"));
+        MODELS.put("wan22",new Model("fal-ai/wan/v2.2-a14b/text-to-video","fal-ai/wan/v2.2-a14b/image-to-video","animation"));
+        MODELS.put("veo31-fast",new Model("fal-ai/veo3.1/fast","fal-ai/veo3.1/fast/image-to-video","animation"));
+    }
+    private static boolean validImage(String u){
+        if(u==null||u.isEmpty())return false;
+        if(u.startsWith("https://"))return u.length()<4000;
+        return u.startsWith("data:image/jpeg;base64,")&&u.length()<8_000_000;
+    }
+    private static String imageSize(String f){
+        switch(f==null?"":f){case "16:9":return "landscape_16_9";case "4:3":return "landscape_4_3";
+            case "1:1":return "square_hd";case "3:4":return "portrait_4_3";default:return "portrait_16_9";}
+    }
+    private static JSONObject buildInput(String modelId,String prompt,String format,String image) throws Exception {
+        JSONObject in=new JSONObject().put("prompt",prompt.trim());
+        boolean hasImage=validImage(image);
+        switch(modelId){
+            case "flux-schnell": in.put("image_size",imageSize(format)).put("num_images",1).put("output_format","jpeg");break;
+            case "nano-banana-2": in.put("aspect_ratio",format).put("num_images",1).put("output_format","jpeg");break;
+            case "wan22": in.put("resolution","480p").put("num_frames",81).put("frames_per_second",16)
+                .put("aspect_ratio",("16:9".equals(format)||"1:1".equals(format))?format:"9:16");
+                if(hasImage)in.put("image_url",image);break;
+            case "veo31-fast": in.put("aspect_ratio","16:9".equals(format)?"16:9":"9:16").put("duration","8s")
+                .put("resolution","720p").put("generate_audio",true);
+                if(hasImage)in.put("image_url",image);break;
+            default: throw new IOException("Modèle inconnu");
+        }
+        return in;
+    }
+    private String launchModel(String sceneId,String index,String modelId,String prompt,String format,String image){
+        Model m=modelId==null?null:MODELS.get(modelId);
+        if(m==null)return "Modèle non autorisé";
+        boolean hasImage=image!=null&&!image.isEmpty();
+        if(hasImage&&!validImage(image))return "Image de départ invalide ou trop lourde";
+        if(hasImage&&m.imageEndpoint==null)return "Ce modèle n'accepte pas d'image de départ";
+        String endpoint="https://queue.fal.run/"+(hasImage?m.imageEndpoint:m.textEndpoint);
+        JSONObject input;
+        try{input=buildInput(modelId,prompt==null?"":prompt,format,image);}catch(Exception e){return "Paramètres invalides";}
+        return launch(m.kind,sceneId,index,prompt,endpoint,input);
+    }
+    // Une clé stable par élément empêche le renvoi facturable lors des doubles clics et réouvertures.
+    private String launch(String kind,String sceneId,String index,String prompt,String endpoint,JSONObject input){
         if(sceneId==null||!sceneId.matches("[a-zA-Z0-9_-]{8,80}"))return "ID de scène invalide";
         if(index==null||!index.matches("[0-9]{1,2}"))return "Numéro de scène invalide";
         if(prompt==null||prompt.trim().isEmpty()||prompt.length()>16000)return "Prompt vide ou trop long";
-        if(!image&&(imageUrl==null||!imageUrl.startsWith("https://")))return "Créez d’abord l’image";
-        String kind=image?"image":"animation",id=sceneId+":"+kind;
+        String id=sceneId+":"+kind;
         synchronized(taskLock){
             JSONObject previous=task(id);
             if(previous!=null)return "Déjà suivi : "+previous.optString("state")+". Aucune nouvelle demande facturable envoyée.";
@@ -271,21 +318,14 @@ public class MainActivity extends Activity {
             }catch(Exception e){return "Impossible de sauvegarder la demande";}
         }
         event(sceneId,index,kind,"progress","Préparation de la demande, ne pas appuyer de nouveau…",null,null);
-        jobs.execute(()->submit(image,id,prompt,imageUrl,format));
+        jobs.execute(()->submit(id,endpoint,input));
         return "Demande démarrée. Ne relancez pas la même scène.";
     }
-    private void submit(boolean image,String key,String prompt,String imageUrl,String format){
+    private void submit(String key,String endpoint,JSONObject input){
         JSONObject rec=task(key);if(rec==null)return;
         String sceneId=rec.optString("sceneId"),idx=rec.optString("index"),kind=rec.optString("kind");
         try{
             String apiKey=decryptKey();
-            String endpoint=image?"https://queue.fal.run/fal-ai/flux/schnell":
-                "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video";
-            JSONObject input=new JSONObject().put("prompt",prompt.trim());
-            if(image){input.put("image_size","16:9".equals(format)?"landscape_16_9":"1:1".equals(format)?"square_hd":"portrait_16_9")
-                .put("num_images",1).put("output_format","jpeg");}
-            else{input.put("image_url",imageUrl).put("resolution","480p").put("num_frames",81)
-                .put("frames_per_second",16).put("aspect_ratio",("16:9".equals(format)||"1:1".equals(format))?format:"9:16");}
             JSONObject reply=requestJSON(endpoint,"POST",apiKey,input);
             String statusUrl=reply.optString("status_url",""),resultUrl=reply.optString("response_url","");
             if(!apiURL(statusUrl)||!apiURL(resultUrl))throw new IOException("Réponse de file d’attente non reconnue. Consultez l'historique fal.ai.");
@@ -738,8 +778,13 @@ public class MainActivity extends Activity {
         @JavascriptInterface public boolean hasKey(){return pref().contains("ct");}
         @JavascriptInterface public void saveKey(String k){if(k==null||k.trim().length()<12)throw new IllegalArgumentException("Clé trop courte");try{encryptKey(k.trim());}catch(Exception e){throw new IllegalStateException("Échec du chiffrement local");}}
         @JavascriptInterface public void forgetKey(){pref().edit().remove("ct").remove("iv").apply();}
-        @JavascriptInterface public String createImage(String sceneId,String index,String prompt,String format){return launch(true,sceneId,index,prompt,null,format);}
-        @JavascriptInterface public String createAnimation(String sceneId,String index,String prompt,String imageUrl,String format){return launch(false,sceneId,index,prompt,imageUrl,format);}
+        @JavascriptInterface public String createImage(String sceneId,String index,String prompt,String format){return launchModel(sceneId,index,"flux-schnell",prompt,format,null);}
+        @JavascriptInterface public String createAnimation(String sceneId,String index,String prompt,String imageUrl,String format){
+            if(imageUrl==null||!imageUrl.startsWith("https://"))return "Créez d’abord l’image";
+            return launchModel(sceneId,index,"wan22",prompt,format,imageUrl);}
+        // V11 : génération avec choix du modèle (liste autorisée ci-dessus).
+        @JavascriptInterface public String generate(String itemId,String index,String modelId,String prompt,String format,String image){
+            return launchModel(itemId,index,modelId,prompt,format,image);}
         @JavascriptInterface public String tasksSnapshot(){return allTasks().toString();}
         @JavascriptInterface public void resumePending(){resumeTasks();}
         @JavascriptInterface public String recoverLegacyRequest(String sceneId,String index,String requestId){return recoverLegacy(sceneId,index,requestId);}

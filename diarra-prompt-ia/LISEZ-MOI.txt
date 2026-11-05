@@ -34,3 +34,12 @@ STATUT DES TESTS
 - JavaScript validé syntaxiquement et dans le navigateur mobile avec simulation de l'interface Android.
 - Test du parcours image > animation > bibliothèque > montage via interface simulée.
 - Compilation APK sur un véritable Code Assist et services fal.ai réels non testés ici.
+
+NOUVEAUTÉS V11 (studio)
+- Projets : créer, renommer, taille de grille, corbeille, supprimer.
+- Barre de création : prompt, réglages Image / Vidéo, format (16:9, 4:3, 1:1, 3:4, 9:16), 1 à 4 résultats.
+- Modèles fal.ai : FLUX Schnell, Nano Banana 2 (images) ; Wan 2.2, Veo 3.1 Fast avec son (vidéos).
+- Vidéo à partir d'une image : photo du téléphone, appareil photo ou image du projet ("Animer cette image").
+- Confirmation obligatoire avant chaque envoi payant.
+- Montage : choisir l'ordre des vidéos, voix off, lecture dans le lecteur Android.
+- À vérifier sur fal.ai : identifiants et prix de Nano Banana 2 et Veo 3.1 Fast.

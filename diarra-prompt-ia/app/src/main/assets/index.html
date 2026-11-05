@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>DIARRA PROMPT IA</title>
+<style>
+:root{
+  --bg:#0b1210;--panel:#14211b;--panel2:#1b2b23;--line:#2a3d33;--text:#eef3ef;--muted:#93a69b;
+  --gold:#ecc679;--gold-ink:#1a1407;--danger:#f08a7e;--ok:#7fd3a0;--r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--text)}
+.hidden{display:none!important}
+.icon{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* En-tête */
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:14px 14px 10px;background:linear-gradient(var(--bg) 70%,transparent)}
+.round{width:44px;height:44px;border-radius:14px;background:var(--panel);display:grid;place-items:center;border:1px solid var(--line)}
+.title{flex:1;min-width:0;font-size:1.25rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand{font-weight:800;letter-spacing:.04em}.brand b{color:var(--gold)}
+.pillgroup{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.pillgroup .round{border:0;background:none}
+
+/* Projets */
+#projects{padding:4px 14px 120px}
+.newproj{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:var(--r);background:var(--gold);color:var(--gold-ink);font-weight:700;margin:6px 0 18px}
+.plist{display:grid;gap:10px}
+.pcard{display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);text-align:left;width:100%}
+.pthumb{width:58px;height:58px;border-radius:12px;background:var(--panel2) center/cover;flex:none;display:grid;place-items:center;color:var(--muted)}
+.pcard .meta{min-width:0}.pcard .meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard small{color:var(--muted)}
+
+/* Grille */
+#studio{padding:0 10px 260px}
+.grid{display:grid;gap:8px;grid-template-columns:repeat(2,1fr)}
+.grid.small{grid-template-columns:repeat(3,1fr)}
+.grid.large{grid-template-columns:1fr}
+.tile{position:relative;border-radius:14px;overflow:hidden;background:var(--panel);border:1px solid var(--line);aspect-ratio:var(--ar,9/16)}
+.tile img,.tile video{width:100%;height:100%;object-fit:cover;display:block}
+.tile .badge{position:absolute;left:8px;top:8px;font-size:.72rem;padding:3px 8px;border-radius:99px;background:#000a;backdrop-filter:blur(4px)}
+.tile .wait{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;color:var(--muted);font-size:.82rem}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:sp 1s linear infinite;margin:0 auto 8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{min-height:52vh;display:grid;place-content:center;text-align:center;gap:16px;color:var(--muted);padding:0 24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-weight:600}
+.btn.gold{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.btn.danger{color:var(--danger)}
+
+/* Barre de création */
+#composer{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--panel);border-top:1px solid var(--line);border-radius:26px 26px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+#start{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+#start img{width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid var(--gold)}
+#start small{flex:1;color:var(--muted)}
+#prompt{width:100%;min-height:52px;max-height:30vh;resize:none;background:transparent;border:0;outline:0;font-size:1.15rem;padding:4px 6px}
+#prompt::placeholder{color:#6f8378}
+.crow{display:flex;align-items:center;gap:10px;margin-top:6px}
+.crow .grow{flex:1}
+.chip{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:.92rem;color:var(--muted)}
+.chip b{color:var(--text);font-weight:600}
+.send{width:50px;height:50px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center}
+.send:disabled{background:var(--panel2);color:#5d6f65}
+
+/* Feuilles et menus */
+.scrim{position:fixed;inset:0;z-index:20;background:#0008}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--panel);border-radius:24px 24px 0 0;border-top:1px solid var(--line);padding:16px 14px calc(18px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto}
+.sheet h3{margin:4px 4px 12px;font-size:1.05rem}
+.seg{display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--bg);border:1px solid var(--line);margin-bottom:10px}
+.seg button{flex:1;padding:11px 4px;border-radius:12px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;align-items:center;gap:3px}
+.seg button[aria-pressed=true]{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--gold)}
+.ratio{display:block;border:2px solid currentColor;border-radius:3px}
+.models{display:grid;gap:6px}
+.model{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid var(--line);text-align:left;width:100%}
+.model[aria-pressed=true]{border-color:var(--gold)}
+.model .meta{flex:1}.model small{color:var(--muted);display:block}
+.price{font-size:.8rem;color:var(--gold);white-space:nowrap}
+.note{font-size:.84rem;color:var(--muted);text-align:center;margin:6px 4px 12px}
+.menu{position:fixed;z-index:21;min-width:230px;background:#101a15;border:1px solid var(--line);border-radius:18px;padding:6px;box-shadow:0 12px 40px #000a}
+.menu button{display:flex;gap:12px;align-items:center;width:100%;padding:13px 12px;border-radius:12px;text-align:left}
+.menu button:active{background:var(--panel2)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.menu .danger{color:var(--danger)}
+.field{width:100%;padding:13px;border-radius:12px;background:var(--bg);border:1px solid var(--line);outline:0}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+
+/* Visionneuse */
+#viewer{position:fixed;inset:0;z-index:30;background:#000;display:flex;flex-direction:column}
+#viewer .stage{flex:1;display:grid;place-items:center;min-height:0}
+#viewer .stage img,#viewer .stage video{max-width:100%;max-height:100%}
+#viewer .bar{display:flex;gap:8px;padding:12px;overflow-x:auto;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+#viewer .bar .btn{white-space:nowrap}
+#viewer .vp{padding:0 14px;color:var(--muted);font-size:.85rem;max-height:20vh;overflow:auto}
+
+/* Montage */
+.clip{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;background:var(--bg);border:1px solid var(--line);margin-bottom:6px}
+.clip video{width:54px;height:54px;object-fit:cover;border-radius:8px;background:#000}
+.clip .meta{flex:1;min-width:0;font-size:.85rem}.clip .meta span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip .num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-size:.8rem}
+.clip.on .num{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.bar2{height:6px;border-radius:9px;background:var(--bg);overflow:hidden;margin:8px 0}.bar2 i{display:block;height:100%;background:var(--gold);width:0}
+
+#toast{position:fixed;left:50%;bottom:260px;transform:translateX(-50%);z-index:40;background:#22352b;border:1px solid var(--line);padding:10px 16px;border-radius:12px;max-width:90vw;font-size:.9rem;text-align:center}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></symbol>
+  <symbol id="i-vid" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></symbol>
+  <symbol id="i-lib" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></symbol>
+</svg>
+
+<!-- Écran des projets -->
+<section id="home">
+  <header>
+    <div class="title brand">DIARRA <b>PROMPT IA</b></div>
+    <div class="pillgroup">
+      <button class="round" id="openMontage" aria-label="Montage"><svg class="icon"><use href="#i-film"/></svg></button>
+      <button class="round" id="openKey" aria-label="Clé fal.ai"><svg class="icon"><use href="#i-key"/></svg></button>
+    </div>
+  </header>
+  <div id="projects">
+    <button class="newproj" id="newProject"><svg class="icon"><use href="#i-plus"/></svg>Nouveau projet</button>
+    <div class="plist" id="plist"></div>
+  </div>
+</section>
+
+<!-- Écran d'un projet -->
+<section id="project" class="hidden">
+  <header>
+    <button class="round" id="back" aria-label="Retour"><svg class="icon"><use href="#i-back"/></svg></button>
+    <div class="title" id="ptitle"></div>
+    <div class="pillgroup">
+      <button class="round" id="searchBtn" aria-label="Rechercher"><svg class="icon"><use href="#i-search"/></svg></button>
+      <button class="round" id="moreBtn" aria-label="Options du projet"><svg class="icon"><use href="#i-more"/></svg></button>
+    </div>
+  </header>
+  <div id="searchRow" class="hidden" style="padding:0 14px 10px"><input id="search" class="field" placeholder="Chercher dans les prompts…"></div>
+  <div id="trashHead" class="hidden" style="padding:0 14px 10px;display:flex;align-items:center;gap:10px">
+    <b style="flex:1">Corbeille</b><button class="btn" id="leaveTrash">Retour au projet</button>
+  </div>
+  <div id="studio">
+    <div class="grid" id="grid"></div>
+    <div class="empty hidden" id="empty">
+      <div>Ce projet est vide.<br>Décrivez une image ou une vidéo ci-dessous, ou partez d'une photo de votre téléphone.</div>
+      <div><button class="btn" id="emptyImport"><svg class="icon"><use href="#i-up"/></svg>Importer une photo</button></div>
+    </div>
+  </div>
+
+  <div id="composer">
+    <div id="start" class="hidden">
+      <img id="startImg" alt="">
+      <small>Image de départ : la vidéo commencera par elle.</small>
+      <button class="round" id="clearStart" aria-label="Retirer l'image"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+    <textarea id="prompt" rows="1" placeholder="Décrivez votre idée…"></textarea>
+    <div class="crow">
+      <button class="round" id="plusBtn" aria-label="Ajouter"><svg class="icon"><use href="#i-plus"/></svg></button>
+      <div class="grow"></div>
+      <button class="chip" id="settingsChip"><span id="chipKind">Image</span><b id="chipRatio">9:16</b><b id="chipCount">×1</b></button>
+      <button class="send" id="sendBtn" aria-label="Générer" disabled><svg class="icon"><use href="#i-send"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<input type="file" id="filePick" accept="image/*" class="hidden">
+
+<!-- Réglages de génération -->
+<div id="settings" class="hidden">
+  <div class="scrim" data-close="settings"></div>
+  <div class="sheet">
+    <p class="note" id="costNote"></p>
+    <div class="seg" id="kindSeg">
+      <button data-v="image"><svg class="icon"><use href="#i-img"/></svg>Image</button>
+      <button data-v="video"><svg class="icon"><use href="#i-vid"/></svg>Vidéo</button>
+    </div>
+    <div class="seg" id="ratioSeg"></div>
+    <div class="seg" id="countSeg">
+      <button data-v="1">×1</button><button data-v="2">×2</button><button data-v="3">×3</button><button data-v="4">×4</button>
+    </div>
+    <h3>Modèle</h3>
+    <div class="models" id="modelList"></div>
+  </div>
+</div>
+
+<!-- Menu + -->
+<div id="plusMenu" class="hidden">
+  <div class="scrim" data-close="plusMenu" style="background:transparent"></div>
+  <div class="menu" style="left:14px;bottom:110px">
+    <button id="mCamera"><svg class="icon"><use href="#i-cam"/></svg>Prendre une photo</button>
+    <button id="mGallery"><svg class="icon"><use href="#i-img"/></svg>Photo du téléphone</button>
+    <button id="mProject"><svg class="icon"><use href="#i-lib"/></svg>Image de ce projet</button>
+  </div>
+</div>
+
+<!-- Menu du projet -->
+<div id="projMenu" class="hidden">
+  <div class="scrim" data-close="projMenu" style="background:transparent"></div>
+  <div class="menu" style="right:14px;top:66px">
+    <button id="mRename"><svg class="icon"><use href="#i-edit"/></svg>Renommer</button>
+    <button id="mGrid"><svg class="icon"><use href="#i-lib"/></svg><span id="gridLabel">Taille de la grille</span></button>
+    <hr>
+    <button id="mTrash"><svg class="icon"><use href="#i-trash"/></svg>Voir la corbeille</button>
+    <hr>
+    <button id="mDelete" class="danger"><svg class="icon"><use href="#i-trash"/></svg>Supprimer le projet</button>
+  </div>
+</div>
+
+<!-- Boîte de dialogue générique -->
+<div id="dialog" class="hidden">
+  <div class="scrim"></div>
+  <div class="sheet">
+    <h3 id="dTitle"></h3>
+    <div id="dBody"></div>
+    <div class="actions" id="dActions"></div>
+  </div>
+</div>
+
+<!-- Visionneuse -->
+<div id="viewer" class="hidden">
+  <header style="background:none">
+    <button class="round" id="vClose" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button>
+    <div class="title" id="vTitle"></div>
+  </header>
+  <div class="stage" id="vStage"></div>
+  <div class="vp" id="vPrompt"></div>
+  <div class="bar" id="vBar"></div>
+</div>
+
+<!-- Montage -->
+<div id="montage" class="hidden">
+  <div class="scrim" data-close="montage"></div>
+  <div class="sheet">
+    <h3>Montage</h3>
+    <p class="note" style="text-align:left">Touchez les vidéos dans l'ordre voulu. Le montage se fait sur le téléphone, sans frais. Les vidéos doivent avoir le même format.</p>
+    <div id="clips"></div>
+    <div class="actions" style="justify-content:flex-start">
+      <button class="btn" id="mImportVid"><svg class="icon"><use href="#i-up"/></svg>Importer un MP4</button>
+      <button class="btn" id="mVoice"><svg class="icon"><use href="#i-sound"/></svg><span id="voiceLabel">Ajouter une voix off</span></button>
+    </div>
+    <div class="bar2"><i id="mProg"></i></div>
+    <p class="note" id="mStatus" style="text-align:left"></p>
+    <div class="actions">
+      <button class="btn hidden" id="mPlay">Lire le dernier montage</button>
+      <button class="btn gold" id="mMake">Créer la vidéo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+"use strict";
+(function(){
+const N = window.NativeFal || null;
+const $ = id => document.getElementById(id);
+const STORE = "diarra_studio_v11";
+
+/* Modèles proposés. Le prix exact dépend de fal.ai : il est confirmé avant chaque envoi. */
+const MODELS = {
+  image: [
+    {id:"flux-schnell", name:"FLUX Schnell", desc:"Rapide, très économique", price:"€", ratios:["16:9","4:3","1:1","3:4","9:16"]},
+    {id:"nano-banana-2", name:"Nano Banana 2", desc:"Plus précis, suit mieux le texte", price:"€€", ratios:["16:9","4:3","1:1","3:4","9:16"]}
+  ],
+  video: [
+    {id:"wan22", name:"Wan 2.2", desc:"5 s, 480p, sans son · avec ou sans image de départ", price:"€", ratios:["16:9","1:1","9:16"]},
+    {id:"veo31-fast", name:"Veo 3.1 Fast", desc:"8 s, 720p, avec son · avec ou sans image de départ", price:"€€€", sound:true, ratios:["16:9","9:16"]}
+  ]
+};
+const RATIO_BOX = {"16:9":[20,11],"4:3":[18,13],"1:1":[15,15],"3:4":[13,18],"9:16":[11,20]};
+
+let state = load();
+let current = null;      // projet ouvert
+let showTrash = false;
+let startImage = null;   // {src, local:boolean}
+const S = state.settings;
+
+function load(){
+  let s=null;
+  try{ s=JSON.parse(localStorage.getItem(STORE)||"null"); }catch(e){}
+  if(!s||!Array.isArray(s.projects)) s={projects:[],settings:{}};
+  s.settings=Object.assign({kind:"image",ratio:"9:16",count:1,image:"flux-schnell",video:"wan22"},s.settings||{});
+  return s;
+}
+function save(){ try{ localStorage.setItem(STORE,JSON.stringify(state)); }catch(e){ toast("Mémoire pleine : supprimez des éléments importés."); } }
+function uid(p){ let a=new Uint8Array(12); crypto.getRandomValues(a); return p+Array.from(a,b=>b.toString(16).padStart(2,"0")).join(""); }
+function esc(t){ return String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.remove("hidden"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.add("hidden"),3600); }
+function show(id){ $(id).classList.remove("hidden"); }
+function hide(id){ $(id).classList.add("hidden"); }
+document.querySelectorAll("[data-close]").forEach(el=>el.onclick=()=>hide(el.dataset.close));
+function dateName(){ return new Date().toLocaleString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}); }
+function ar(r){ const [w,h]=(r||"9:16").split(":"); return w+"/"+h; }
+function model(kind,id){ return MODELS[kind].find(m=>m.id===id)||MODELS[kind][0]; }
+
+/* ---------- Boîte de dialogue ---------- */
+function dialog(title,html,buttons){
+  $("dTitle").textContent=title; $("dBody").innerHTML=html; const a=$("dActions"); a.innerHTML="";
+  buttons.forEach(b=>{ const el=document.createElement("button"); el.className="btn "+(b.cls||""); el.textContent=b.label;
+    el.onclick=()=>{ if(b.run&&b.run()===false) return; hide("dialog"); }; a.appendChild(el); });
+  show("dialog");
+}
+
+/* ---------- Projets ---------- */
+function renderHome(){
+  const l=$("plist");
+  if(!state.projects.length){ l.innerHTML='<p class="note">Aucun projet. Créez le premier.</p>'; return; }
+  l.innerHTML="";
+  state.projects.slice().sort((a,b)=>b.updated-a.updated).forEach(p=>{
+    const alive=p.items.filter(i=>!i.trash);
+    const cover=alive.find(i=>i.type==="image"&&i.url);
+    const b=document.createElement("button"); b.className="pcard";
+    b.innerHTML='<div class="pthumb" '+(cover?'style="background-image:url(\''+esc(cover.url)+'\')"':'')+'>'+(cover?'':'<svg class="icon"><use href="#i-img"/></svg>')+'</div>'+
+      '<div class="meta"><b>'+esc(p.name)+'</b><small>'+alive.length+' élément(s)</small></div>';
+    b.onclick=()=>openProject(p.id); l.appendChild(b);
+  });
+}
+$("newProject").onclick=()=>{
+  const p={id:uid("p"),name:dateName(),items:[],grid:"medium",updated:Date.now()};
+  state.projects.push(p); save(); openProject(p.id);
+};
+function openProject(id){
+  current=state.projects.find(p=>p.id===id); if(!current) return;
+  showTrash=false; hide("home"); show("project"); renderProject(); syncTasks();
+}
+$("back").onclick=()=>{ current=null; hide("project"); show("home"); renderHome(); };
+
+function renderProject(){
+  $("ptitle").textContent=current.name;
+  const q=($("search").value||"").toLowerCase();
+  const items=current.items.filter(i=>!!i.trash===showTrash && (!q||(i.prompt||"").toLowerCase().includes(q)));
+  $("trashHead").classList.toggle("hidden",!showTrash);
+  $("composer").classList.toggle("hidden",showTrash);
+  const g=$("grid"); g.className="grid "+(current.grid||"medium"); g.innerHTML="";
+  $("empty").classList.toggle("hidden",items.length>0||showTrash||!!q);
+  if(showTrash&&!items.length) g.innerHTML='<p class="note" style="grid-column:1/-1">La corbeille est vide.</p>';
+  items.slice().reverse().forEach(it=>{
+    const d=document.createElement("button"); d.className="tile"; d.style.setProperty("--ar",ar(it.ratio));
+    let inner="";
+    if(it.url&&it.type==="video") inner='<video src="'+esc(it.url)+'" muted playsinline preload="metadata"></video>';
+    else if(it.url) inner='<img src="'+esc(it.url)+'" alt="" loading="lazy">';
+    else if(it.status==="error"||it.status==="paused") inner='<div class="wait">⚠️<br>'+esc(it.message||"Interrompu")+'</div>';
+    else inner='<div class="wait"><div><div class="spin"></div>'+esc(it.message||"En attente…")+'</div></div>';
+    inner+='<span class="badge">'+(it.type==="video"?"Vidéo":it.imported?"Photo":"Image")+'</span>';
+    d.innerHTML=inner; d.onclick=()=>openViewer(it); g.appendChild(d);
+  });
+  updateSend();
+}
+$("searchBtn").onclick=()=>{ $("searchRow").classList.toggle("hidden"); $("search").focus(); };
+$("search").oninput=renderProject;
+$("moreBtn").onclick=()=>{ $("gridLabel").textContent="Grille : "+({small:"petite",medium:"moyenne",large:"grande"}[current.grid||"medium"]); show("projMenu"); };
+$("mRename").onclick=()=>{ hide("projMenu");
+  dialog("Renommer le projet",'<input id="rn" class="field" maxlength="60" value="'+esc(current.name)+'">',[
+    {label:"Annuler"},{label:"Enregistrer",cls:"gold",run:()=>{ const v=$("rn").value.trim(); if(v){current.name=v;touch();renderProject();} }}]);
+};
+$("mGrid").onclick=()=>{ const o=["small","medium","large"]; current.grid=o[(o.indexOf(current.grid||"medium")+1)%3]; touch(); hide("projMenu"); renderProject(); };
+$("mTrash").onclick=()=>{ hide("projMenu"); showTrash=true; renderProject(); };
+$("leaveTrash").onclick=()=>{ showTrash=false; renderProject(); };
+$("mDelete").onclick=()=>{ hide("projMenu");
+  dialog("Supprimer le projet ?","<p>Le projet et sa liste seront effacés de l'application. Les fichiers déjà enregistrés dans Téléchargements restent sur le téléphone.</p>",[
+    {label:"Annuler"},{label:"Supprimer",cls:"danger",run:()=>{
+      current.items.forEach(i=>releaseTask(i));
+      state.projects=state.projects.filter(p=>p!==current); save(); $("back").onclick(); }}]);
+};
+function touch(){ if(current) current.updated=Date.now(); save(); }
+
+/* ---------- Réglages ---------- */
+function renderSettings(){
+  const m=model(S.kind,S[S.kind]);
+  if(!m.ratios.includes(S.ratio)) S.ratio=m.ratios.includes("9:16")?"9:16":m.ratios[0];
+  if(startImage&&S.kind==="image") {} // l'image de départ ne sert qu'aux vidéos
+  $("kindSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.kind));
+  $("ratioSeg").innerHTML=m.ratios.map(r=>{const [w,h]=RATIO_BOX[r];
+    return '<button data-v="'+r+'" aria-pressed="'+(r===S.ratio)+'"><span class="ratio" style="width:'+w+'px;height:'+h+'px"></span>'+r+'</button>';}).join("");
+  $("ratioSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.ratio=b.dataset.v;save();renderSettings();});
+  $("countSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===S.count));
+  $("modelList").innerHTML=MODELS[S.kind].map(x=>
+    '<button class="model" data-v="'+x.id+'" aria-pressed="'+(x.id===m.id)+'">'+
+    (x.sound?'<svg class="icon"><use href="#i-sound"/></svg>':'<svg class="icon"><use href="#'+(S.kind==="video"?"i-vid":"i-img")+'"/></svg>')+
+    '<span class="meta"><b>'+esc(x.name)+'</b><small>'+esc(x.desc)+'</small></span><span class="price">'+x.price+'</span></button>').join("");
+  $("modelList").querySelectorAll("button").forEach(b=>b.onclick=()=>{S[S.kind]=b.dataset.v;save();renderSettings();});
+  $("costNote").textContent=S.count+" "+(S.kind==="video"?"vidéo(s)":"image(s)")+" avec "+m.name+" · payant chez fal.ai, confirmation demandée avant l'envoi.";
+  $("chipKind").textContent=S.kind==="video"?"Vidéo":"Image";
+  $("chipRatio").textContent=S.ratio; $("chipCount").textContent="×"+S.count;
+  updateStart();
+}
+$("kindSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.kind=b.dataset.v;save();renderSettings();});
+$("countSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.count=+b.dataset.v;save();renderSettings();});
+$("settingsChip").onclick=()=>{renderSettings();show("settings");};
+
+/* ---------- Image de départ ---------- */
+function updateStart(){
+  const on=!!startImage;
+  $("start").classList.toggle("hidden",!on);
+  if(on) $("startImg").src=startImage.src;
+}
+function setStart(src){ startImage={src}; if(S.kind!=="video"){S.kind="video";save();} renderSettings(); toast("Image de départ ajoutée : choisissez le modèle vidéo puis décrivez le mouvement."); }
+$("clearStart").onclick=()=>{ startImage=null; updateStart(); };
+$("plusBtn").onclick=()=>show("plusMenu");
+$("mGallery").onclick=()=>{ hide("plusMenu"); pickPhoto(false,"start"); };
+$("mCamera").onclick=()=>{ hide("plusMenu"); pickPhoto(true,"start"); };
+$("emptyImport").onclick=()=>pickPhoto(false,"project");
+$("mProject").onclick=()=>{ hide("plusMenu");
+  const imgs=current.items.filter(i=>!i.trash&&i.type==="image"&&i.url);
+  if(!imgs.length){ toast("Aucune image dans ce projet pour l'instant."); return; }
+  dialog("Choisir l'image de départ",'<div class="grid small">'+imgs.map((i,n)=>'<button class="tile" data-n="'+n+'" style="--ar:'+ar(i.ratio)+'"><img src="'+esc(i.url)+'"></button>').join("")+'</div>',[{label:"Fermer"}]);
+  $("dBody").querySelectorAll("button").forEach(b=>b.onclick=()=>{ hide("dialog"); setStart(imgs[+b.dataset.n].url); });
+};
+let pickTarget="start";
+function pickPhoto(camera,target){
+  pickTarget=target; const f=$("filePick");
+  if(camera) f.setAttribute("capture","environment"); else f.removeAttribute("capture");
+  f.value=""; f.click();
+}
+$("filePick").onchange=async e=>{
+  const file=e.target.files&&e.target.files[0]; if(!file) return;
+  try{
+    const data=await shrink(file,1280);
+    if(pickTarget==="project"){
+      addItem({type:"image",imported:true,url:data.url,ratio:data.ratio,prompt:file.name||"Photo importée",status:"done"});
+      toast("Photo ajoutée au projet.");
+    } else setStart(data.url);
+  }catch(err){ toast("Photo illisible : "+err.message); }
+};
+// Réduit la photo (JPEG ≤ 1280 px) pour l'envoyer rapidement et la garder dans le projet.
+function shrink(file,max){
+  return new Promise((ok,ko)=>{
+    const r=new FileReader();
+    r.onerror=()=>ko(new Error("lecture impossible"));
+    r.onload=()=>{ const img=new Image();
+      img.onerror=()=>ko(new Error("format non pris en charge"));
+      img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; const k=Math.min(1,max/Math.max(w,h)); w=Math.round(w*k); h=Math.round(h*k);
+        const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h);
+        const q=w/h; const ratio=q>1.5?"16:9":q>1.15?"4:3":q>0.87?"1:1":q>0.65?"3:4":"9:16";
+        ok({url:c.toDataURL("image/jpeg",0.86),ratio}); };
+      img.src=r.result; };
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- Génération ---------- */
+const promptEl=$("prompt");
+promptEl.oninput=()=>{ promptEl.style.height="auto"; promptEl.style.height=Math.min(promptEl.scrollHeight,window.innerHeight*0.3)+"px"; updateSend(); };
+function updateSend(){ $("sendBtn").disabled=!promptEl.value.trim(); }
+$("sendBtn").onclick=()=>{
+  const prompt=promptEl.value.trim(); if(!prompt) return;
+  if(!N){ toast("Fonction disponible dans l'application Android."); return; }
+  if(!N.hasKey()){ askKey("Ajoutez d'abord votre clé fal.ai."); return; }
+  const kind=S.kind, m=model(kind,S[kind]);
+  const withStart=kind==="video"&&startImage;
+  dialog("Confirmer la génération payante",
+    "<p><b>"+S.count+" "+(kind==="video"?"vidéo(s)":"image(s)")+"</b> avec <b>"+esc(m.name)+"</b>, format "+S.ratio+(withStart?", à partir de votre image":"")+".</p>"+
+    "<p class='note' style='text-align:left'>fal.ai facture chaque "+(kind==="video"?"vidéo":"image")+" selon son tarif en vigueur pour ce modèle ("+m.price+"). Une demande envoyée ne peut pas être annulée.</p>",
+    [{label:"Annuler"},{label:"Générer",cls:"gold",run:()=>{ launch(prompt,kind,m,withStart?startImage.src:""); }}]);
+};
+function launch(prompt,kind,m,image){
+  const n=S.count;
+  for(let k=0;k<n;k++){
+    const it=addItem({type:kind,model:m.id,prompt,ratio:S.ratio,status:"progress",message:"Envoi…",start:image&&!image.startsWith("data:")?image:""});
+    const res=N.generate(it.id,String(k+1),m.id,prompt,S.ratio,image||"");
+    if(res&&!/^Demande démarrée/.test(res)){ it.status="error"; it.message=res; }
+  }
+  touch(); renderProject(); promptEl.value=""; promptEl.oninput(); startImage=null; updateStart();
+}
+function addItem(o){ const it=Object.assign({id:uid("it"),created:Date.now()},o); current.items.push(it); touch(); renderProject(); return it; }
+function taskKind(it){ return it.type==="video"?"animation":"image"; }
+function releaseTask(it){ if(N&&!it.imported) try{ N.releaseTask(it.id,taskKind(it)); }catch(e){} }
+function findItem(id){ for(const p of state.projects){ const it=p.items.find(i=>i.id===id); if(it) return [p,it]; } return [null,null]; }
+
+// Le côté Android appelle cette fonction pour chaque nouvelle étape.
+window.diarraApiResult=function(raw){
+  let e; try{ e=typeof raw==="string"?JSON.parse(raw):raw; }catch(err){ return; }
+  if(e.kind==="simple"||e.kind==="library"){ montageEvent(e); return; }
+  const [p,it]=findItem(e.sceneId); if(!it) return;
+  if(e.status==="saved"){ toast(e.message); return; }
+  it.message=e.message;
+  if(e.status==="done"&&e.url){ it.url=e.url; it.status="done"; }
+  else if(e.status==="error") it.status="error";
+  else if(e.status==="paused") it.status="paused";
+  else it.status="progress";
+  if(e.requestId) it.requestId=e.requestId;
+  p.updated=Date.now(); save();
+  if(current===p) renderProject(); else if(!current) renderHome();
+};
+function syncTasks(){
+  if(!N) return;
+  let all={}; try{ all=JSON.parse(N.tasksSnapshot()||"{}"); }catch(e){}
+  Object.keys(all).forEach(k=>{ const t=all[k]; const [,it]=findItem(t.sceneId); if(!it) return;
+    if(t.url&&!it.url){ it.url=t.url; it.status="done"; }
+    else if(!it.url){ it.message=t.message; it.status=t.state==="FAILED"?"error":(t.state==="PAUSED"||t.state==="UNKNOWN")?"paused":"progress"; }
+  });
+  save(); if(current) renderProject();
+  try{ N.resumePending(); }catch(e){}
+}
+
+/* ---------- Visionneuse ---------- */
+function openViewer(it){
+  $("vTitle").textContent=it.type==="video"?"Vidéo":it.imported?"Photo importée":"Image";
+  $("vStage").innerHTML=it.url?(it.type==="video"?'<video src="'+esc(it.url)+'" controls playsinline autoplay></video>':'<img src="'+esc(it.url)+'" alt="">'):'<p class="note">'+esc(it.message||"En cours…")+'</p>';
+  $("vPrompt").textContent=it.prompt||"";
+  const bar=$("vBar"); bar.innerHTML="";
+  const add=(label,fn,cls)=>{ const b=document.createElement("button"); b.className="btn "+(cls||""); b.textContent=label; b.onclick=fn; bar.appendChild(b); };
+  if(it.trash){
+    add("Restaurer",()=>{ it.trash=false; touch(); closeViewer(); });
+    add("Supprimer définitivement",()=>{ releaseTask(it); current.items=current.items.filter(x=>x!==it); touch(); closeViewer(); },"danger");
+  } else {
+    if(it.type==="image"&&it.url) add("Animer cette image",()=>{ closeViewer(); setStart(it.url); promptEl.focus(); },"gold");
+    if(it.prompt&&!it.imported) add("Réutiliser le prompt",()=>{ closeViewer(); promptEl.value=it.prompt; promptEl.oninput(); });
+    if(it.url&&N&&!it.url.startsWith("data:")) add("Enregistrer",()=>{ N.downloadMedia(it.url,it.type==="video"?"video":"image",String((current.items.indexOf(it)%99)+1)); toast("Enregistrement dans Téléchargements/DiarraPromptIA…"); });
+    if(it.status==="paused"&&N) add("Reprendre le suivi (gratuit)",()=>{ N.resumePending(); toast("Suivi relancé, sans nouvelle facturation."); });
+    add("Corbeille",()=>{ it.trash=true; touch(); closeViewer(); },"danger");
+  }
+  show("viewer");
+}
+function closeViewer(){ $("vStage").innerHTML=""; hide("viewer"); renderProject(); }
+$("vClose").onclick=closeViewer;
+
+/* ---------- Clé fal.ai ---------- */
+function askKey(msg){
+  const has=N&&N.hasKey();
+  dialog("Clé fal.ai",(msg?"<p>"+esc(msg)+"</p>":"")+
+    "<p class='note' style='text-align:left'>"+(has?"Une clé est enregistrée et chiffrée sur ce téléphone.":"Aucune clé enregistrée.")+" Elle ne quitte le téléphone que vers fal.ai.</p>"+
+    "<input id='keyIn' class='field' type='password' autocomplete='off' placeholder='Coller une nouvelle clé'>",
+    [has?{label:"Oublier la clé",cls:"danger",run:()=>{ N.forgetKey(); toast("Clé supprimée."); }}:{label:"Fermer"},
+     {label:"Enregistrer",cls:"gold",run:()=>{ const v=$("keyIn").value.trim(); if(!N){toast("Application Android requise.");return false;}
+        try{ N.saveKey(v); toast("Clé enregistrée."); }catch(e){ toast("Clé refusée (trop courte ?)."); return false; } }}]);
+}
+$("openKey").onclick=()=>askKey("");
+
+/* ---------- Montage ---------- */
+let order=[];
+function renderClips(){
+  let lib=[]; try{ lib=JSON.parse(N?N.librarySnapshot():"[]"); }catch(e){}
+  const c=$("clips");
+  if(!lib.length){ c.innerHTML='<p class="note">Aucune vidéo. Vos vidéos générées arrivent ici automatiquement.</p>'; return; }
+  c.innerHTML="";
+  lib.slice().reverse().forEach(v=>{
+    const pos=order.indexOf(v.id);
+    const d=document.createElement("button"); d.className="clip"+(pos>=0?" on":""); d.style.width="100%";
+    d.innerHTML='<video src="'+esc(v.url)+'#t=0.5" muted preload="metadata"></video><span class="meta"><span>'+esc(v.name||"Vidéo")+'</span><small style="color:var(--muted)">'+(v.size?Math.round(v.size/1e5)/10+" Mo":"")+'</small></span><span class="num">'+(pos>=0?pos+1:"")+'</span>';
+    d.onclick=()=>{ if(pos>=0) order.splice(pos,1); else if(order.length<24) order.push(v.id); renderClips(); };
+    c.appendChild(d);
+  });
+}
+function refreshVoice(){
+  let st={}; try{ st=JSON.parse(N?N.simpleStatus():"{}"); }catch(e){}
+  $("voiceLabel").textContent=st.voiceName?"Voix : "+st.voiceName+" (retirer)":"Ajouter une voix off";
+  $("mVoice").dataset.has=st.voiceName?"1":"";
+  $("mPlay").classList.toggle("hidden",!st.lastName);
+}
+$("openMontage").onclick=()=>{ renderClips(); refreshVoice(); $("mStatus").textContent=""; $("mProg").style.width="0"; show("montage"); };
+$("mImportVid").onclick=()=>{ if(N) toast(N.chooseVideoForLibrary()); };
+$("mVoice").onclick=()=>{ if(!N) return; if($("mVoice").dataset.has) N.removeSimpleVoice(); else N.chooseSimpleVoice(); };
+$("mMake").onclick=()=>{ if(!N) return; if(!order.length){ toast("Touchez au moins une vidéo."); return; } N.createMontageWithVideos(JSON.stringify(order)); };
+$("mPlay").onclick=()=>{ if(N) N.openSimpleMontage(); };
+function montageEvent(e){
+  if(e.kind==="library"){ toast(e.message); if(!$("montage").classList.contains("hidden")) renderClips(); return; }
+  $("mStatus").textContent=e.message||"";
+  if(e.percent!=null) $("mProg").style.width=e.percent+"%";
+  if(e.status==="done"){ $("mProg").style.width="100%"; order=[]; renderClips(); refreshVoice(); toast(e.message); }
+  if(e.status==="voice") refreshVoice();
+  if(e.status==="error") toast(e.message);
+}
+
+/* ---------- Démarrage ---------- */
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) syncTasks(); });
+renderSettings(); renderHome(); syncTasks();
+})();
+</script>
+</body>
+</html>
