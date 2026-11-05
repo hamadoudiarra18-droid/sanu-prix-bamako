@@ -344,7 +344,12 @@ public class MainActivity extends Activity {
             setTaskState(key,"UNKNOWN","État d'envoi incertain : "+safeError(e)+". Vérifiez Requests sur fal.ai avant toute nouvelle génération.",null);
         }
     }
-    private static String safeError(Exception e){String s=e.getMessage();return s==null?"Erreur réseau":s.substring(0,Math.min(s.length(),250));}
+    private static String safeError(Exception e){
+        // V11 : messages compréhensibles pour les coupures réseau courantes.
+        if(e instanceof java.net.UnknownHostException)return "pas d'internet pour le moment";
+        if(e instanceof java.net.SocketTimeoutException)return "réseau trop lent";
+        if(e instanceof java.net.ConnectException||e instanceof javax.net.ssl.SSLException)return "connexion interrompue";
+        String s=e.getMessage();return s==null?"Erreur réseau":s.substring(0,Math.min(s.length(),250));}
     private void startPoller(String key){
         synchronized(taskLock){if(livePollers.contains(key))return;
             JSONObject t=task(key);if(t==null||!apiURL(t.optString("statusUrl"))||!apiURL(t.optString("resultUrl")))return;
@@ -383,8 +388,8 @@ public class MainActivity extends Activity {
                 setTaskState(key,state,msg,null);
             }catch(Exception e){
                 retry++;
-                setTaskState(key,"PAUSED","Connexion ou récupération indisponible ("+safeError(e)+"). Nouvelle vérification sans facturation…",null);
-                if(retry>=18){setTaskState(key,"PAUSED","Suivi mis en pause après plusieurs erreurs réseau. Appuyez sur Reprendre le suivi (gratuit).",null);return;}
+                setTaskState(key,"RETRYING","Réseau coupé ("+safeError(e)+"). La vidéo continue chez fal.ai ; nouvel essai automatique dans 20 s, sans facturation.",null);
+                if(retry>=60){setTaskState(key,"PAUSED","Suivi mis en pause après plusieurs erreurs réseau. Appuyez sur Reprendre le suivi (gratuit).",null);return;}
             }
             try{Thread.sleep(retry>0?20000:12000);}catch(InterruptedException e){Thread.currentThread().interrupt();return;}
         }
