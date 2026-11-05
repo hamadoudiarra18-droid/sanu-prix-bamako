@@ -208,6 +208,21 @@ public class MainActivity extends Activity {
             && s.length()<2000 && u.getUserInfo()==null;}
         catch(Exception e){return false;}
     }
+    // V11 : erreur renvoyée par fal.ai (code HTTP connu), à distinguer d'une coupure réseau.
+    private static final class ApiException extends IOException {
+        final int code;final String body;
+        ApiException(int c,String b){super("API "+c+" : "+(b.length()>230?b.substring(0,230):b));code=c;body=b;}
+        boolean refused(){return code>=400&&code<500&&code!=408&&code!=429;}
+    }
+    private static String apiRefusal(ApiException e){
+        String b=e.body==null?"":e.body;
+        if(b.contains("content_policy_violation")||b.contains("content checker"))
+            return "Refusé par le filtre de contenu de fal.ai. Reformulez le prompt ou changez d'image de départ, puis relancez.";
+        if(e.code==401||e.code==403)return "Clé fal.ai refusée ou crédit insuffisant. Vérifiez votre clé et votre solde sur fal.ai.";
+        if(e.code==404)return "Demande introuvable chez fal.ai (expirée ou modèle indisponible).";
+        if(e.code==422)return "Paramètres refusés par fal.ai pour ce modèle. Essayez un autre format ou un autre modèle.";
+        return "Demande refusée par fal.ai (erreur "+e.code+").";
+    }
     private static HttpURLConnection open(String url,String method,String apiKey) throws Exception {
         if (!apiURL(url)) throw new IOException("Adresse API fal.ai non reconnue");
         HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();c.setRequestMethod(method);
@@ -224,7 +239,7 @@ public class MainActivity extends Activity {
                 try(OutputStream out=c.getOutputStream()){out.write(body.toString().getBytes(StandardCharsets.UTF_8));}}
             int code=c.getResponseCode();InputStream stream=code<400?c.getInputStream():c.getErrorStream();
             String result=stream == null?"":new String(readAll(stream,2_000_000),StandardCharsets.UTF_8);
-            if(code>=300)throw new IOException("API "+code+" : "+ (result.length()>230?result.substring(0,230):result));
+            if(code>=300)throw new ApiException(code,result.length()>600?result.substring(0,600):result);
             return new JSONObject(result);
         }finally{c.disconnect();}
     }
@@ -343,6 +358,7 @@ public class MainActivity extends Activity {
             // Une requête POST peut réussir côté serveur puis échouer côté téléphone.
             // Dans le doute, ne jamais l'envoyer une seconde fois automatiquement.
             synchronized(taskLock){liveSubmissions.remove(key);}
+            if(e instanceof ApiException&&((ApiException)e).refused()){setTaskState(key,"FAILED",apiRefusal((ApiException)e),null);return;}
             setTaskState(key,"UNKNOWN","État d'envoi incertain : "+safeError(e)+". Vérifiez Requests sur fal.ai avant toute nouvelle génération.",null);
         }
     }
@@ -389,6 +405,7 @@ public class MainActivity extends Activity {
                 msg+=" ("+minutes+" min). Aucune nouvelle demande envoyée.";
                 setTaskState(key,state,msg,null);
             }catch(Exception e){
+                if(e instanceof ApiException&&((ApiException)e).refused()){setTaskState(key,"FAILED",apiRefusal((ApiException)e),null);return;}
                 retry++;
                 setTaskState(key,"RETRYING","Réseau coupé ("+safeError(e)+"). La vidéo continue chez fal.ai ; nouvel essai automatique dans 20 s, sans facturation.",null);
                 if(retry>=60){setTaskState(key,"PAUSED","Suivi mis en pause après plusieurs erreurs réseau. Appuyez sur Reprendre le suivi (gratuit).",null);return;}
