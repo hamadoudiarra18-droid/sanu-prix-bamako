@@ -1,0 +1,36 @@
+DIARRA PROMPT IA — Studio créatif V10 (Android / Code Assist)
+
+IMPORTANT
+Ce projet n'est pas le logiciel Google Flow et ne contient aucun code privé Google.
+Il reprend certaines méthodes de travail d'un studio de création IA, dans une interface originale.
+
+FONCTIONS ACTIVES
+- Préparer de 1 à 8 scènes et leurs prompts à partir d'une idée (règles locales, pas un modèle génératif).
+- Modifier le prompt image et le prompt animation de chaque scène.
+- Générer une image avec fal.ai FLUX Schnell, puis animer une image générée avec fal.ai Wan 2.2.
+- Demander la confirmation avant tout envoi susceptible d'être facturé.
+- Retrouver les demandes fal.ai suivies par les versions précédentes sans refaire de POST.
+- Conserver et importer vos anciens MP4 via la bibliothèque Android existante.
+- Choisir vos vidéos, les réordonner et les assembler localement, avec voix off optionnelle, musique synthétique et bruitages.
+- Lire le MP4 final dans le lecteur vidéo Android.
+
+LIMITES
+- Ne reproduit pas la totalité de Google Flow : pas de moteur Google propriétaire, pas d'Agent Google Flow, pas d'édition multimodale interactive, pas de fonctions Google 4K ni de moteur d'extension vidéo Google.
+- La génération avec fal.ai est payante selon le modèle ; aucune requête IA ne part sans confirmation.
+- Les MP4 du montage doivent partager une configuration vidéo compatible (codec, résolution, etc.).
+- Ne pas supprimer l'application précédente : l'installation en mise à jour avec le même applicationId et la même signature peut conserver les clés chiffrées et vidéos.
+
+INSTALLATION
+Code Assist > menu (...) > Import a project > Project file > choisir ce ZIP.
+Compiler en utilisant la même clé de signature que la version précédente et installer par-dessus l'ancienne version.
+Si la signature diffère, NE PAS désinstaller l'ancienne application avant sauvegarde des données.
+
+SECURITE
+- Aucune clé fal.ai n'est inscrite dans le ZIP.
+- La clé déjà saisie reste enregistrée via Android Keystore, si les données de l'application sont conservées.
+- Les options de montage local ne font aucune demande de génération payante.
+
+STATUT DES TESTS
+- JavaScript validé syntaxiquement et dans le navigateur mobile avec simulation de l'interface Android.
+- Test du parcours image > animation > bibliothèque > montage via interface simulée.
+- Compilation APK sur un véritable Code Assist et services fal.ai réels non testés ici.
