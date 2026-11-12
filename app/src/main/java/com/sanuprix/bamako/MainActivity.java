@@ -92,6 +92,9 @@ public class MainActivity extends Activity {
         if (p.endsWith(".jpg") || p.endsWith(".jpeg")) return "image/jpeg";
         if (p.endsWith(".svg")) return "image/svg+xml";
         if (p.endsWith(".json")) return "application/json";
+        if (p.endsWith(".mp3")) return "audio/mpeg";
+        if (p.endsWith(".mp4")) return "video/mp4";
+        if (p.endsWith(".webp")) return "image/webp";
         return "application/octet-stream";
     }
 
